@@ -4,13 +4,62 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { CategoryService, Category as SupabaseCategory } from '@/lib/category-service'
 import { ProductService, Product as SupabaseProduct } from '@/lib/product-service'
 
-// Cache for storing data
-const dataCache = {
-  categories: null as any[] | null,
-  products: null as any[] | null,
-  lastFetch: 0,
-  cacheTimeout: 5 * 60 * 1000, // 5 minutes
+// Enhanced cache configuration with persistence
+const CACHE_KEY = 'ssg_store_cache'
+const CACHE_VERSION = '1.0'
+
+interface CacheData {
+  categories: any[] | null
+  products: any[] | null
+  lastFetch: number | null
+  version: string
 }
+
+// Load cache from localStorage on initialization
+const loadCacheFromStorage = (): CacheData => {
+  if (typeof window === 'undefined') {
+    return {
+      categories: null,
+      products: null,
+      lastFetch: null,
+      version: CACHE_VERSION
+    }
+  }
+
+  try {
+    const cached = localStorage.getItem(CACHE_KEY)
+    if (cached) {
+      const parsed = JSON.parse(cached)
+      // Check cache version compatibility
+      if (parsed.version === CACHE_VERSION) {
+        return parsed
+      }
+    }
+  } catch (error) {
+    console.warn('Failed to load cache from storage:', error)
+  }
+
+  return {
+    categories: null,
+    products: null,
+    lastFetch: null,
+    version: CACHE_VERSION
+  }
+}
+
+// Save cache to localStorage
+const saveCacheToStorage = (cache: CacheData) => {
+  if (typeof window === 'undefined') return
+
+  try {
+    localStorage.setItem(CACHE_KEY, JSON.stringify(cache))
+  } catch (error) {
+    console.warn('Failed to save cache to storage:', error)
+  }
+}
+
+const dataCache: CacheData = loadCacheFromStorage()
+const cacheTimeout = 10 * 60 * 1000 // Increased to 10 minutes for better performance
 
 // Convert Supabase product to your app's product format
 function convertSupabaseProduct(supabaseProduct: SupabaseProduct) {
@@ -48,7 +97,7 @@ export function useSupabaseData() {
     if (loadingRef.current) return
     
     const now = Date.now()
-    const isCacheValid = dataCache.lastFetch && (now - dataCache.lastFetch) < dataCache.cacheTimeout
+    const isCacheValid = dataCache.lastFetch && (now - dataCache.lastFetch) < cacheTimeout
     
     // Use cache if valid and not forcing refresh
     if (!forceRefresh && isCacheValid && dataCache.categories && dataCache.products) {
@@ -77,10 +126,13 @@ export function useSupabaseData() {
       const convertedCategories = supabaseCategories.map(convertSupabaseCategory)
       const convertedProducts = supabaseProducts.map(convertSupabaseProduct)
 
-      // Update cache
+      // Cache the converted data
       dataCache.categories = convertedCategories
       dataCache.products = convertedProducts
       dataCache.lastFetch = now
+      
+      // Persist to localStorage for faster subsequent loads
+      saveCacheToStorage(dataCache)
 
       setCategories(convertedCategories)
       setProducts(convertedProducts)

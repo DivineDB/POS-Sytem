@@ -4,9 +4,15 @@
   "private": true,
   "scripts": {
     "build": "next build",
-    "dev": "next dev",
+    "build:analyze": "ANALYZE=true next build",
+    "dev": "next dev --turbo",
+    "dev:debug": "NODE_OPTIONS='--inspect' next dev",
     "lint": "next lint",
-    "start": "next start"
+    "start": "next start",
+    "start:prod": "NODE_ENV=production next start",
+    "analyze": "npx @next/bundle-analyzer",
+    "lighthouse": "lighthouse http://localhost:3000 --output=json --output-path=./lighthouse-report.json",
+    "perf": "npm run build && npm run lighthouse"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
