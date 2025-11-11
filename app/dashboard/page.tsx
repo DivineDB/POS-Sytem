@@ -10,6 +10,7 @@ export default function DashboardPage() {
   const [priceMode, setPriceMode] = useState<"retail" | "wholesale">("retail")
   const [currentTime, setCurrentTime] = useState(new Date())
   const [isProfitHidden, setIsProfitHidden] = useState(true)
+  const [isRevenueHidden, setIsRevenueHidden] = useState(true)
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 60000)
@@ -50,9 +51,24 @@ export default function DashboardPage() {
                 <div className="pos-panel p-4 rounded-lg">
                   <div className="flex items-center gap-2">
                     <IndianRupee className="h-5 w-5 text-blue-500" />
-                    <span className="text-sm text-muted-foreground">Total Sales</span>
+                    <span className="text-sm text-muted-foreground">Total Revenue</span>
+                    <button
+                      type="button"
+                      onClick={() => setIsRevenueHidden((v) => !v)}
+                      className="p-1 rounded-md hover:bg-foreground/5 transition ml-auto"
+                      aria-label={isRevenueHidden ? "Show revenue" : "Hide revenue"}
+                      title={isRevenueHidden ? "Show revenue" : "Hide revenue"}
+                    >
+                      {isRevenueHidden ? (
+                        <EyeOff className="w-4 h-4" />
+                      ) : (
+                        <Eye className="w-4 h-4" />
+                      )}
+                    </button>
                   </div>
-                  <div className="text-2xl font-bold mt-1">₹{analytics.totalSales.toFixed(2)}</div>
+                  <div className="text-2xl font-bold mt-1">
+                    {isRevenueHidden ? "₹••••••" : `₹${analytics.totalSales.toFixed(2)}`}
+                  </div>
                 </div>
                 <div className="pos-panel p-4 rounded-lg">
                   <div className="flex items-center gap-2">
