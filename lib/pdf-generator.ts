@@ -95,7 +95,8 @@ export function generateBillPDF(order: Order, settings: InvoiceSettings): void {
   doc.setTextColor(...secondaryColor)
 
   // Left side info
-  doc.text("TABLE:", leftMargin + 2, yPosition)
+  const isTable = order.tableNumber.toLowerCase().includes("table")
+  doc.text(isTable ? "TABLE:" : "CASHIER:", leftMargin + 2, yPosition)
   doc.setFont("helvetica", "normal")
   doc.text(order.tableNumber, leftMargin + (isReceipt ? 15 : 25), yPosition)
   

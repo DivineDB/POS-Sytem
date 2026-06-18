@@ -19,9 +19,11 @@ export function CategoryCard({
   isSelected?: boolean
 }) {
   return (
-    <div
+    <button
+      type="button"
       className={cn(
-        "tile p-4 cursor-pointer transition-all hover:opacity-80",
+        "tile p-4 cursor-pointer transition-all hover:opacity-80 text-left w-full",
+        "focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--pos-brand)] focus-visible:outline-none focus-visible:ring-offset-background",
         color,
         isSelected && "ring-2 ring-pos-brand ring-offset-2 ring-offset-background",
       )}
@@ -38,6 +40,6 @@ export function CategoryCard({
         <div className="font-semibold text-lg text-pretty">{title}</div>
         <div className="text-xs opacity-70">{items} items</div>
       </div>
-    </div>
+    </button>
   )
 }

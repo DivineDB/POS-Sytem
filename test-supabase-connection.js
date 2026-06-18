@@ -5,8 +5,8 @@ const { createClient } = require('@supabase/supabase-js')
 const fetch = require('node-fetch')
 
 // Your Supabase credentials
-const supabaseUrl = 'https://urbeysueketnxjsmgnmg.supabase.co'
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVyYmV5c3Vla2V0bnhqc21nbm1nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE4MzE1NTksImV4cCI6MjA3NzQwNzU1OX0.TxbDIotPZI4zD2HCMwId_0s-JH2j_FC5xNm3XsqYmTk'
+const supabaseUrl = 'https://oqpvuvkddyrdyrrtwlfz.supabase.co'
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9xcHZ1dmtkZHlyZHlycnR3bGZ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUxMjI2NTMsImV4cCI6MjA5MDY5ODY1M30.ybmLhFwPvAfSftmV46x4_e2cPiB0UMsVw_gSgp_jprg'
 
 const supabase = createClient(supabaseUrl, supabaseKey, {
   global: {

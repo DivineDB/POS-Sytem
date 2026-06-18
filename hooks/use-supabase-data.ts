@@ -272,6 +272,7 @@ export function useSupabaseData() {
     refetch: () => loadData(true), // Force refresh when manually refetching
     loadData,
     addCategory,
+    deleteCategory,
     addProduct,
     updateProduct,
     deleteProduct,

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo, useCallback } from "react"
+import { useState, useMemo, useCallback, useEffect } from "react"
 import { Sidebar } from "@/components/pos/sidebar"
 import { SearchBar } from "@/components/pos/search-bar"
 import { CategoryCard } from "@/components/pos/category-card"
@@ -12,7 +12,7 @@ import { useSupabaseData } from "@/hooks/use-supabase-data"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { OrdersLoadingSkeleton } from "@/components/pos/loading-skeleton"
 import { PageTransition } from "@/components/ui/page-transition"
-import { Sparkles } from "lucide-react"
+import { Sparkles, Clock } from "lucide-react"
 
 export default function OrdersPage() {
   const { categories: zustandCategories, products: zustandProducts } = useStore()
@@ -25,6 +25,15 @@ export default function OrdersPage() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState("")
   const [priceMode, setPriceMode] = useState<"retail" | "wholesale">("retail")
+  const [time, setTime] = useState<Date | null>(null)
+
+  useEffect(() => {
+    setTime(new Date())
+    const timer = setInterval(() => {
+      setTime(new Date())
+    }, 1000)
+    return () => clearInterval(timer)
+  }, [])
 
   // Debounce search query for better performance
   const debouncedSearchQuery = useDebouncedValue(searchQuery, 300)
@@ -65,8 +74,19 @@ export default function OrdersPage() {
               <div className="flex gap-3 flex-1 overflow-hidden">
                 <Sidebar />
                 <section className="flex-1 flex flex-col gap-3 overflow-hidden">
-                <div className="flex items-center justify-between">
-                  <SearchBar onSearch={setSearchQuery} />
+                  <h1 className="sr-only">New Order Point of Sale Dashboard</h1>
+                  <div className="flex items-center justify-between flex-wrap gap-3">
+                    <div className="flex items-center gap-3">
+                      <SearchBar onSearch={setSearchQuery} />
+                      {time && (
+                        <div className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-muted-foreground bg-[var(--pos-panel)] border border-[var(--pos-stroke)] rounded-lg font-medium shadow-sm">
+                          <Clock className="w-3.5 h-3.5 text-[var(--pos-brand)]" />
+                          <span>{time.toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
+                          <span className="text-muted-foreground/30">•</span>
+                          <span>{time.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true })}</span>
+                        </div>
+                      )}
+                    </div>
                   <div className="flex items-center gap-2 pos-panel p-1">
                     <button
                       onClick={() => setPriceMode("retail")}

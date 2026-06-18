@@ -48,13 +48,6 @@ const nextConfig = {
         },
       }
     }
-    
-    // Optimize imports
-    config.resolve.alias = {
-      ...config.resolve.alias,
-      '@': require('path').resolve(__dirname),
-    }
-    
     return config
   },
   // Enable static optimization

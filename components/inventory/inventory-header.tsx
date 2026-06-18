@@ -1,13 +1,13 @@
 "use client"
 
-import { useState } from "react"
+import { useState, FormEvent } from "react"
 import { Plus } from "lucide-react"
 
 export function InventoryHeader({ onAddCategory }: { onAddCategory: (name: string) => void }) {
   const [showCategoryForm, setShowCategoryForm] = useState(false)
   const [categoryName, setCategoryName] = useState("")
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault()
     if (categoryName.trim()) {
       onAddCategory(categoryName)

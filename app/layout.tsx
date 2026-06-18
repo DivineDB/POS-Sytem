@@ -1,5 +1,4 @@
-import type React from "react"
-import type { Metadata } from "next"
+import type { Metadata, Viewport } from "next"
 import { GeistSans } from "geist/font/sans"
 import { GeistMono } from "geist/font/mono"
 import { Analytics } from "@vercel/analytics/next"
@@ -12,21 +11,20 @@ export const metadata: Metadata = {
   generator: "SSG Store",
   keywords: ["POS", "Point of Sale", "Inventory", "Restaurant", "Billing"],
   authors: [{ name: "SSG Store" }],
-  viewport: "width=device-width, initial-scale=1, viewport-fit=cover",
-  themeColor: "#2980b9",
   manifest: "/manifest.json",
 }
 
-// Performance optimization: Preload critical resources
-export function generateViewport() {
-  return {
-    width: 'device-width',
-    initialScale: 1,
-    maximumScale: 1,
-    userScalable: false,
-    viewportFit: 'cover',
-  }
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: "cover",
+  themeColor: "#2980b9",
 }
+
+import { AuthProvider } from "@/context/auth-context"
+import { ThemeProvider } from "@/components/theme-provider"
 
 export default function RootLayout({
   children,
@@ -34,13 +32,12 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className="dark antialiased h-full">
+    <html lang="en" className="antialiased h-full" suppressHydrationWarning>
       <head>
-        {/* Preload critical resources */}
-        <link rel="preload" href="/fonts/geist-sans.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="dns-prefetch" href="https://api.supabase.co" />
-        
+
+
         {/* Performance hints */}
         <meta name="format-detection" content="telephone=no" />
         <meta name="mobile-web-app-capable" content="yes" />
@@ -53,23 +50,33 @@ export default function RootLayout({
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-foreground"></div>
           </div>
         }>
-          {children}
+          <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
+            <AuthProvider>
+              {children}
+            </AuthProvider>
+          </ThemeProvider>
         </Suspense>
+
         <Analytics />
         
-        {/* Service Worker Registration */}
+        {/* Service Worker Unregistration & Cache Clearing (Ensures hot-reloads apply immediately in dev) */}
         <script
           dangerouslySetInnerHTML={{
             __html: `
               if ('serviceWorker' in navigator) {
-                window.addEventListener('load', () => {
-                  navigator.serviceWorker.register('/sw.js')
-                    .then((registration) => {
-                      console.log('SW registered: ', registration);
-                    })
-                    .catch((registrationError) => {
-                      console.log('SW registration failed: ', registrationError);
-                    });
+                navigator.serviceWorker.getRegistrations().then((registrations) => {
+                  for (let registration of registrations) {
+                    registration.unregister()
+                      .then(() => console.log('SW unregistered successfully'));
+                  }
+                });
+              }
+              if ('caches' in window) {
+                caches.keys().then((names) => {
+                  for (let name of names) {
+                    caches.delete(name)
+                      .then(() => console.log('Cache cleared: ' + name));
+                  }
                 });
               }
             `,

@@ -1,19 +1,26 @@
 "use client"
 
-import { IndianRupee, QrCode, Wallet, Download, ShoppingBag, CreditCard } from "lucide-react"
+import { IndianRupee, QrCode, Wallet, Download, ShoppingBag, CreditCard, User } from "lucide-react"
 import { useState } from "react"
 import { useCart } from "./cart-context"
 import { generateBillPDF } from "@/lib/pdf-generator"
 import { useStore } from "@/lib/store"
 import { BillService } from "@/lib/bill-service"
+import { useAuth } from "@/context/auth-context"
 
 type PaymentMethod = "cash" | "online" | "credit"
 
 export function OrderSummary({ priceMode }: { priceMode: "retail" | "wholesale" }) {
   const { items, subtotal, clear } = useCart()
   const { addOrder, incrementProductOrder, decrementStock, invoiceSettings } = useStore()
-  const [tableNumber, setTableNumber] = useState("Table 5")
+  const { user } = useAuth()
   const [isGenerating, setIsGenerating] = useState(false)
+
+  const activeProfile = (() => {
+    const name = user?.user_metadata?.full_name || user?.email?.split('@')[0] || "Guest"
+    const role = user?.user_metadata?.role || "owner"
+    return `${name} (${role.charAt(0).toUpperCase() + role.slice(1)})`
+  })()
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("cash")
 
   const tax = subtotal * (invoiceSettings.taxRate ?? 0.1)
@@ -36,7 +43,7 @@ export function OrderSummary({ priceMode }: { priceMode: "retail" | "wholesale" 
         })),
         total,
         date: new Date().toISOString(),
-        tableNumber,
+        tableNumber: activeProfile,
         type: priceMode,
       }
       addOrder(order)
@@ -48,7 +55,7 @@ export function OrderSummary({ priceMode }: { priceMode: "retail" | "wholesale" 
 
       // Save bill to Supabase
       const billData = await BillService.createBill({
-        tableNumber,
+        tableNumber: activeProfile,
         type: priceMode,
         paymentMethod,
         items: items.map((item) => ({
@@ -70,7 +77,7 @@ export function OrderSummary({ priceMode }: { priceMode: "retail" | "wholesale" 
 
       // Generate PDF
       generateBillPDF({
-        tableNumber,
+        tableNumber: activeProfile,
         items: items.map((item) => ({
           id: item.id,
           name: item.name,
@@ -97,12 +104,9 @@ export function OrderSummary({ priceMode }: { priceMode: "retail" | "wholesale" 
 
   return (
     <aside className="pos-panel w-96 shrink-0 p-4 flex flex-col gap-4 h-full">
-      <header className="flex items-center justify-between shrink-0">
-        <div>
-          <div className="text-sm font-semibold">Main Branch</div>
-          <div className="text-xs text-foreground/60">{tableNumber}</div>
-        </div>
-        <button className="pos-panel rounded-full p-2" aria-label="Edit table" />
+      <header className="flex items-center gap-1.5 shrink-0 pb-2 border-b border-[var(--pos-stroke)]">
+        <User className="w-3.5 h-3.5 text-[var(--pos-brand)] shrink-0" />
+        <span className="text-sm font-semibold text-foreground truncate">{activeProfile}</span>
       </header>
 
       {items.length === 0 ? (
@@ -159,46 +163,43 @@ export function OrderSummary({ priceMode }: { priceMode: "retail" | "wholesale" 
             </div>
 
             <div>
-              <div className="text-sm mb-2">Payment Method</div>
+              <div className="text-sm font-medium mb-2">Payment Method</div>
               <div className="grid grid-cols-3 gap-2">
-                <button 
+                <button
                   onClick={() => setPaymentMethod("cash")}
-                  className={`pos-panel rounded-lg py-3 text-sm grid place-items-center gap-1 transition-all duration-200 transform ${
-                    paymentMethod === "cash" 
-                      ? "bg-blue-500 text-white shadow-lg scale-105 border-2 border-blue-400" 
-                      : "hover:bg-muted/50 hover:scale-105 hover:shadow-md active:scale-95 active:bg-muted/70"
+                  aria-pressed={paymentMethod === "cash"}
+                  className={`rounded-xl min-h-[52px] text-sm flex flex-col items-center justify-center gap-1.5 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--pos-brand)] focus-visible:outline-none focus-visible:ring-offset-background border-2 ${
+                    paymentMethod === "cash"
+                      ? "border-[var(--pos-brand)] bg-muted/40 text-foreground scale-[1.02] shadow-sm"
+                      : "border-[var(--pos-stroke)] bg-[var(--pos-panel)] text-foreground/60 hover:text-foreground hover:scale-[1.01]"
                   }`}
                 >
-                  <IndianRupee className={`h-5 w-5 transition-transform duration-200 ${
-                    paymentMethod === "cash" ? "scale-110" : ""
-                  }`} />
-                  <span className="text-xs font-medium">Cash</span>
+                  <IndianRupee className="h-4 w-4" />
+                  <span className="text-[11px] font-semibold tracking-wide">Cash</span>
                 </button>
-                <button 
+                <button
                   onClick={() => setPaymentMethod("online")}
-                  className={`pos-panel rounded-lg py-3 text-sm grid place-items-center gap-1 transition-all duration-200 transform ${
-                    paymentMethod === "online" 
-                      ? "bg-green-500 text-white shadow-lg scale-105 border-2 border-green-400" 
-                      : "hover:bg-muted/50 hover:scale-105 hover:shadow-md active:scale-95 active:bg-muted/70"
+                  aria-pressed={paymentMethod === "online"}
+                  className={`rounded-xl min-h-[52px] text-sm flex flex-col items-center justify-center gap-1.5 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--pos-brand)] focus-visible:outline-none focus-visible:ring-offset-background border-2 ${
+                    paymentMethod === "online"
+                      ? "border-[var(--pos-brand)] bg-muted/40 text-foreground scale-[1.02] shadow-sm"
+                      : "border-[var(--pos-stroke)] bg-[var(--pos-panel)] text-foreground/60 hover:text-foreground hover:scale-[1.01]"
                   }`}
                 >
-                  <QrCode className={`h-5 w-5 transition-transform duration-200 ${
-                    paymentMethod === "online" ? "scale-110" : ""
-                  }`} />
-                  <span className="text-xs font-medium">Online</span>
+                  <QrCode className="h-4 w-4" />
+                  <span className="text-[11px] font-semibold tracking-wide">Online</span>
                 </button>
-                <button 
+                <button
                   onClick={() => setPaymentMethod("credit")}
-                  className={`pos-panel rounded-lg py-3 text-sm grid place-items-center gap-1 transition-all duration-200 transform ${
-                    paymentMethod === "credit" 
-                      ? "bg-purple-500 text-white shadow-lg scale-105 border-2 border-purple-400" 
-                      : "hover:bg-muted/50 hover:scale-105 hover:shadow-md active:scale-95 active:bg-muted/70"
+                  aria-pressed={paymentMethod === "credit"}
+                  className={`rounded-xl min-h-[52px] text-sm flex flex-col items-center justify-center gap-1.5 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--pos-brand)] focus-visible:outline-none focus-visible:ring-offset-background border-2 ${
+                    paymentMethod === "credit"
+                      ? "border-[var(--pos-brand)] bg-muted/40 text-foreground scale-[1.02] shadow-sm"
+                      : "border-[var(--pos-stroke)] bg-[var(--pos-panel)] text-foreground/60 hover:text-foreground hover:scale-[1.01]"
                   }`}
                 >
-                  <CreditCard className={`h-5 w-5 transition-transform duration-200 ${
-                    paymentMethod === "credit" ? "scale-110" : ""
-                  }`} />
-                  <span className="text-xs font-medium">Credit</span>
+                  <CreditCard className="h-4 w-4" />
+                  <span className="text-[11px] font-semibold tracking-wide">Credit</span>
                 </button>
               </div>
             </div>
@@ -206,7 +207,7 @@ export function OrderSummary({ priceMode }: { priceMode: "retail" | "wholesale" 
             <button
               onClick={handlePlaceOrder}
               disabled={isGenerating}
-              className="w-full rounded-full py-3 text-center font-medium bg-foreground text-background hover:opacity-90 disabled:opacity-50 transition flex items-center justify-center gap-2"
+              className="w-full rounded-full py-3 text-center font-medium bg-foreground text-background hover:opacity-90 disabled:opacity-50 transition flex items-center justify-center gap-2 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--pos-brand)] focus-visible:outline-none focus-visible:ring-offset-background"
             >
               <Download size={18} />
               {isGenerating ? "Generating..." : "Place Order"}

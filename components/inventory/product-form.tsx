@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, FormEvent } from "react"
 
 export function ProductForm({
   product,
@@ -23,7 +23,7 @@ export function ProductForm({
     }
   }, [product])
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault()
     if (name.trim() && price) {
       onSubmit({
