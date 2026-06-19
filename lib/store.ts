@@ -52,6 +52,7 @@ interface StoreState {
   priceMode: "retail" | "wholesale"
   setPriceMode: (mode: "retail" | "wholesale") => void
   addCategory: (category: Category) => void
+  deleteCategory: (id: string) => void
   addProduct: (product: Product) => void
   updateProduct: (id: string, product: Partial<Product>) => void
   deleteProduct: (id: string) => void
@@ -225,6 +226,11 @@ export const useStore = create<StoreState>()(
         showLineTotal: true,
       },
       addCategory: (category) => set((state) => ({ categories: [...state.categories, category] })),
+      deleteCategory: (id) =>
+        set((state) => ({
+          categories: state.categories.filter((c) => c.id !== id),
+          products: state.products.filter((p) => p.category !== id),
+        })),
       addProduct: (product) => set((state) => ({ products: [...state.products, product] })),
       updateProduct: (id, updates) =>
         set((state) => ({

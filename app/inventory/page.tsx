@@ -11,7 +11,7 @@ import { Plus, Pencil, Trash2, Package } from "lucide-react"
 import { toast } from "sonner"
 
 export default function InventoryPage() {
-  const { categories: zustandCategories, products: zustandProducts, addProduct: zustandAddProduct, updateProduct: zustandUpdateProduct, deleteProduct: zustandDeleteProduct, addCategory: zustandAddCategory } = useStore()
+  const { categories: zustandCategories, products: zustandProducts, addProduct: zustandAddProduct, updateProduct: zustandUpdateProduct, deleteProduct: zustandDeleteProduct, addCategory: zustandAddCategory, deleteCategory: zustandDeleteCategory } = useStore()
   const { 
     categories: supabaseCategories, 
     products: supabaseProducts, 
@@ -30,7 +30,7 @@ export default function InventoryPage() {
   const updateProduct = supabaseCategories.length > 0 ? supabaseUpdateProduct : zustandUpdateProduct
   const deleteProduct = supabaseCategories.length > 0 ? supabaseDeleteProduct : zustandDeleteProduct
   const addCategory = supabaseCategories.length > 0 ? supabaseAddCategory : zustandAddCategory
-  const deleteCategory = supabaseCategories.length > 0 ? supabaseDeleteCategory : () => Promise.resolve(false)
+  const deleteCategory = supabaseCategories.length > 0 ? supabaseDeleteCategory : zustandDeleteCategory
   
   const [selectedCategory, setSelectedCategory] = useState(categories[0]?.id || "")
   const [showForm, setShowForm] = useState(false)
@@ -95,20 +95,14 @@ export default function InventoryPage() {
 
   const executeDeleteCategory = async (categoryId: string) => {
     try {
-      if (supabaseCategories.length > 0) {
-        console.log("Using Supabase delete...")
-        const success = await CategoryService.deleteCategory(categoryId)
-        if (success) {
-          console.log("✅ Category deleted successfully from Supabase!")
-          toast.success("Category deleted successfully!")
-          setTimeout(() => window.location.reload(), 1000)
-        } else {
-          throw new Error("Delete operation returned false")
-        }
-      } else {
-        console.log("Using hook delete...")
-        await deleteCategory(categoryId)
-        toast.success("Category deleted successfully!")
+      console.log("Executing category delete for:", categoryId)
+      await deleteCategory(categoryId)
+      toast.success("Category deleted successfully!")
+      
+      // Auto-select another category if the currently selected one was deleted
+      if (selectedCategory === categoryId) {
+        const remainingCategories = categories.filter((c) => c.id !== categoryId)
+        setSelectedCategory(remainingCategories[0]?.id || "")
       }
     } catch (error) {
       console.error("❌ Error deleting category:", error)
