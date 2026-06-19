@@ -16,8 +16,16 @@ export default function SettingsPage() {
   const [language, setLanguage] = useState("en")
   const [notifications, setNotifications] = useState(true)
   const { invoiceSettings, updateInvoiceSettings } = useStore()
-  const { user, signOut } = useAuth()
+  const { user, signOut, updateProfileName } = useAuth()
   const [showToast, setShowToast] = useState(false)
+  const [fullName, setFullName] = useState(user?.user_metadata?.full_name || "")
+  const [updatingProfile, setUpdatingProfile] = useState(false)
+
+  useEffect(() => {
+    if (user?.user_metadata?.full_name) {
+      setFullName(user.user_metadata.full_name)
+    }
+  }, [user])
 
   // Avoid hydration mismatch
   useEffect(() => {
@@ -30,6 +38,19 @@ export default function SettingsPage() {
     const newTheme = currentTheme === "light" ? "dark" : "light"
     setTheme(newTheme)
     triggerSaveFeedback()
+  }
+
+  const handleUpdateProfile = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setUpdatingProfile(true)
+    try {
+      await updateProfileName(fullName)
+      triggerSaveFeedback()
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setUpdatingProfile(false)
+    }
   }
 
   const triggerSaveFeedback = () => {
@@ -369,21 +390,42 @@ export default function SettingsPage() {
                       <div className="p-5 rounded-2xl bg-foreground/[0.02] border border-foreground/5 space-y-4">
                         <div className="flex items-center gap-4">
                           <div className="h-12 w-12 rounded-xl bg-gradient-to-tr from-[var(--pos-brand)] to-[var(--pos-accent-blue)] flex items-center justify-center font-bold text-black text-lg shrink-0">
-                            {user?.email?.[0].toUpperCase() || <User className="w-5 h-5 text-black" />}
+                            {fullName ? fullName[0].toUpperCase() : (user?.email?.[0].toUpperCase() || <User className="w-5 h-5 text-black" />)}
                           </div>
                           <div>
-                            <p className="font-semibold text-foreground">{user?.email || "Anonymous Profile"}</p>
+                            <p className="font-semibold text-foreground">{fullName || user?.email || "Anonymous Profile"}</p>
                             <p className="text-xs text-emerald-500 dark:text-emerald-400 flex items-center gap-1 font-medium">
                               <Shield className="w-3.5 h-3.5" /> Authenticated via Supabase
                             </p>
                           </div>
                         </div>
-
-
                       </div>
 
+                      {/* Profile Edit Form */}
+                      <form onSubmit={handleUpdateProfile} className="space-y-4 max-w-md">
+                        <div className="space-y-2">
+                          <label htmlFor="full-name" className="text-xs font-semibold text-muted-foreground uppercase tracking-wider cursor-pointer">Full Name / Cashier Name</label>
+                          <input
+                            id="full-name"
+                            value={fullName}
+                            onChange={(e) => setFullName(e.target.value)}
+                            className="w-full bg-foreground/5 border border-foreground/10 rounded-xl px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-[var(--pos-brand)]"
+                            placeholder="Cashier Name"
+                            required
+                          />
+                        </div>
+                        <button
+                          type="submit"
+                          disabled={updatingProfile}
+                          className="flex items-center gap-2 bg-[var(--pos-brand)] hover:opacity-90 text-black px-5 py-2.5 rounded-xl font-semibold transition cursor-pointer disabled:opacity-50"
+                        >
+                          {updatingProfile ? "Saving..." : "Save Profile Details"}
+                        </button>
+                      </form>
+
                       {/* Mocked security elements (Premium visual design) */}
-                      <div className="space-y-3 pt-2">
+                      <div className="space-y-3 pt-2 border-t border-[var(--pos-stroke)]">
+                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Security</p>
                         <div className="flex items-center justify-between p-4 rounded-xl bg-foreground/[0.02] border border-foreground/5 opacity-60">
                           <div>
                             <p className="font-semibold text-foreground text-sm">Two-Factor Authentication</p>

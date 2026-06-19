@@ -23,10 +23,10 @@ export function CategoryCard({
     <button
       type="button"
       className={cn(
-        "tile p-4 cursor-pointer transition-all hover:opacity-80 text-left w-full relative",
+        "tile cursor-pointer transition-all hover:opacity-80 text-left w-full relative",
         "focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--pos-brand)] focus-visible:outline-none focus-visible:ring-offset-background",
         color,
-        isSelected && "ring-2 ring-pos-brand ring-offset-2 ring-offset-background",
+        isSelected ? "border-2 border-foreground p-[15px]" : "border border-pos-stroke p-4",
       )}
       onClick={onClick}
     >

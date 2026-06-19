@@ -13,7 +13,7 @@ import { ProductService } from "@/lib/product-service"
 
 type PaymentMethod = "cash" | "online" | "credit"
 
-export function OrderSummary({ priceMode }: { priceMode: "retail" | "wholesale" }) {
+export function OrderSummary({ priceMode, refetchData }: { priceMode: "retail" | "wholesale"; refetchData?: () => void }) {
   const { items, subtotal, clear } = useCart()
   const { addOrder, incrementProductOrder, decrementStock, invoiceSettings } = useStore()
   const { user } = useAuth()
@@ -109,6 +109,7 @@ export function OrderSummary({ priceMode }: { priceMode: "retail" | "wholesale" 
       }, invoiceSettings)
 
       clear()
+      refetchData?.()
 
       toast.success("Order placed successfully! Bill downloaded and saved to history.")
       setIsSuccess(true)

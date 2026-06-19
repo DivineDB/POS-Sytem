@@ -17,11 +17,31 @@ const mockUser: User = {
   created_at: new Date().toISOString()
 }
 
+const getPersistedMockUser = (): User => {
+  if (typeof window === 'undefined') return mockUser
+  try {
+    const savedName = localStorage.getItem('ssg_mock_cashier_name')
+    if (savedName) {
+      return {
+        ...mockUser,
+        user_metadata: {
+          ...mockUser.user_metadata,
+          full_name: savedName
+        }
+      }
+    }
+  } catch (e) {
+    console.warn(e)
+  }
+  return mockUser
+}
+
 interface AuthContextType {
   user: User | null
   session: Session | null
   loading: boolean
   signOut: () => Promise<void>
+  updateProfileName: (name: string) => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -29,6 +49,7 @@ const AuthContext = createContext<AuthContextType>({
   session: null,
   loading: true,
   signOut: async () => {},
+  updateProfileName: async () => {},
 })
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
@@ -47,18 +68,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           setSession(session)
           setUser(session.user)
         } else {
-          setUser(mockUser)
+          setUser(getPersistedMockUser())
           setSession({
             access_token: "mock-token",
             token_type: "bearer",
             expires_in: 3600,
             refresh_token: "mock-refresh",
-            user: mockUser,
+            user: getPersistedMockUser(),
           })
         }
       } catch (error) {
         console.error("Error getting initial session:", error)
-        setUser(mockUser)
+        setUser(getPersistedMockUser())
       } finally {
         setLoading(false)
       }
@@ -78,13 +99,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           setSession(session)
           setUser(session.user)
         } else {
-          setUser(mockUser)
+          setUser(getPersistedMockUser())
           setSession({
             access_token: "mock-token",
             token_type: "bearer",
             expires_in: 3600,
             refresh_token: "mock-refresh",
-            user: mockUser,
+            user: getPersistedMockUser(),
           })
         }
         setLoading(false)
@@ -118,6 +139,30 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }
 
+  const updateProfileName = async (name: string) => {
+    if (session && session.user && session.user.id !== "00000000-0000-0000-0000-000000000000") {
+      const { data, error } = await supabase.auth.updateUser({
+        data: { full_name: name }
+      })
+      if (error) throw error
+      if (data && data.user) {
+        setUser(data.user)
+      }
+    } else {
+      localStorage.setItem('ssg_mock_cashier_name', name)
+      setUser(prev => {
+        const baseUser = prev || getPersistedMockUser()
+        return {
+          ...baseUser,
+          user_metadata: {
+            ...baseUser.user_metadata,
+            full_name: name
+          }
+        }
+      })
+    }
+  }
+
   if (loading) {
     return (
       <div className="h-screen w-screen flex items-center justify-center bg-black">
@@ -126,9 +171,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     )
   }
 
-  // Guard: login page bypassed, we render children directly
   return (
-    <AuthContext.Provider value={{ user: user || mockUser, session, loading, signOut }}>
+    <AuthContext.Provider value={{ user: user || getPersistedMockUser(), session, loading, signOut, updateProfileName }}>
       {children}
     </AuthContext.Provider>
   )

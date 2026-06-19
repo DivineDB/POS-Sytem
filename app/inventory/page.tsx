@@ -124,7 +124,8 @@ export default function InventoryPage() {
         onClick: () => executeDeleteCategory(categoryId),
       },
       cancel: {
-        label: "Cancel"
+        label: "Cancel",
+        onClick: () => {},
       },
       duration: 5000,
     })

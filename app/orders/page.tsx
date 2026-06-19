@@ -17,7 +17,7 @@ import Link from "next/link"
 
 export default function OrdersPage() {
   const { categories: zustandCategories, products: zustandProducts, priceMode, setPriceMode } = useStore()
-  const { categories: supabaseCategories, products: supabaseProducts, loading } = useSupabaseData()
+  const { categories: supabaseCategories, products: supabaseProducts, loading, refetch } = useSupabaseData()
   
   // Use Supabase data if available, fallback to Zustand
   const categories = supabaseCategories.length > 0 ? supabaseCategories : zustandCategories
@@ -162,7 +162,7 @@ export default function OrdersPage() {
                 </div>
               </section>
 
-              <OrderSummary priceMode={priceMode} />
+              <OrderSummary priceMode={priceMode} refetchData={refetch} />
             </div>
           </div>
         </div>
