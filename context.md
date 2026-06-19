@@ -41,4 +41,25 @@ This document outlines the current state, architecture, and ongoing development 
   - **Manual Switcher Fallback**: Retained the cashier selector list as a fallback menu to allow employees to quickly switch to another cashier if needed without signing out completely.
 
 
+### 4. Database Schema and Checkout Fixes (Completed)
+- **Goal**: Resolve database insert failures during checkouts.
+- **Details**:
+  - Added the missing `payment_method` column to the `bill_history` table in the database schema.
+  - Altered the `table_number` field constraint from `VARCHAR(20)` to `VARCHAR(100)` to prevent SQL overflows when cashier names (e.g., `"Admin Cashier (Owner)"`, 21 chars) exceed the length limit.
 
+### 5. UI Alignment & Card Clipping Fixes (Completed)
+- **Goal**: Fix outline corner clipping on selected category cards and align category cards grid layout.
+- **Details**:
+  - Replaced high-contrast outer shadow rings (`ring-2`) on selected category cards with internal borders (`border-2 border-foreground p-[15px]`) to eliminate outline corner clipping caused by parent `overflow-hidden`.
+  - Standardized all category cards' name and items count layouts by setting a fixed height (`h-14`) and `line-clamp-2` on card titles in [category-card.tsx](file:///d:/DBs/codes/posL/POS-Sytem/components/pos/category-card.tsx).
+
+### 6. Unified Category Deletion Support (Completed)
+- **Goal**: Enable fully working category deletion across both Supabase and Guest modes.
+- **Details**:
+  - Implemented the `deleteCategory` method in the Zustand store in [store.ts](file:///d:/DBs/codes/posL/POS-Sytem/lib/store.ts) to support offline mode deletion and automatically cascade delete products in that category.
+  - Linked the inventory view's delete action in [inventory/page.tsx](file:///d:/DBs/codes/posL/POS-Sytem/app/inventory/page.tsx) directly to `deleteCategory` (hook or Zustand) to immediately update client state and clear the local persistent data cache without needing page reloads.
+
+### 7. Hosted Platform Resiliency (Completed)
+- **Goal**: Prevent hosted site crashes due to missing environment variables.
+- **Details**:
+  - Configured hardcoded public Supabase URL and Anon Key as fallback values inside [supabase.ts](file:///d:/DBs/codes/posL/POS-Sytem/lib/supabase.ts) so the application connects automatically on platforms like Vercel even if env keys are not explicitly set in the dashboard.
