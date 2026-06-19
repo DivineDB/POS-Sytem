@@ -5,7 +5,17 @@ import { User, Session } from "@supabase/supabase-js"
 import { supabase } from "@/lib/supabase"
 import { useRouter, usePathname } from "next/navigation"
 
-import LoginPage from "@/app/login/page"
+const mockUser: User = {
+  id: "00000000-0000-0000-0000-000000000000",
+  email: "guest@ssgstore.com",
+  app_metadata: {},
+  user_metadata: {
+    full_name: "Admin Cashier",
+    role: "owner"
+  },
+  aud: "authenticated",
+  created_at: new Date().toISOString()
+}
 
 interface AuthContextType {
   user: User | null
@@ -33,10 +43,22 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const getInitialSession = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession()
-        setSession(session)
-        setUser(session?.user ?? null)
+        if (session) {
+          setSession(session)
+          setUser(session.user)
+        } else {
+          setUser(mockUser)
+          setSession({
+            access_token: "mock-token",
+            token_type: "bearer",
+            expires_in: 3600,
+            refresh_token: "mock-refresh",
+            user: mockUser,
+          })
+        }
       } catch (error) {
         console.error("Error getting initial session:", error)
+        setUser(mockUser)
       } finally {
         setLoading(false)
       }
@@ -52,8 +74,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     // 2. Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (_event, session) => {
-        setSession(session)
-        setUser(session?.user ?? null)
+        if (session) {
+          setSession(session)
+          setUser(session.user)
+        } else {
+          setUser(mockUser)
+          setSession({
+            access_token: "mock-token",
+            token_type: "bearer",
+            expires_in: 3600,
+            refresh_token: "mock-refresh",
+            user: mockUser,
+          })
+        }
         setLoading(false)
       }
     )
@@ -77,7 +110,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setLoading(true)
     try {
       await supabase.auth.signOut()
-      router.push("/login")
+      router.push("/orders")
     } catch (error) {
       console.error("Error signing out:", error)
     } finally {
@@ -93,17 +126,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     )
   }
 
-  // Guard: if user is not authenticated, render LoginPage directly for any protected route
-  if (!user) {
-    return (
-      <AuthContext.Provider value={{ user, session, loading, signOut }}>
-        <LoginPage />
-      </AuthContext.Provider>
-    )
-  }
-
+  // Guard: login page bypassed, we render children directly
   return (
-    <AuthContext.Provider value={{ user, session, loading, signOut }}>
+    <AuthContext.Provider value={{ user: user || mockUser, session, loading, signOut }}>
       {children}
     </AuthContext.Provider>
   )

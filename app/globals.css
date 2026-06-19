@@ -288,4 +288,23 @@
     transform: translateY(-1px) scale(1.01);
     box-shadow: 0 4px 15px -4px rgba(0, 0, 0, 0.2);
   }
+
+  /* Add-to-cart pop animation */
+  @keyframes pop {
+    0% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.05);
+      border-color: var(--pos-brand);
+      box-shadow: 0 0 10px var(--pos-brand);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+
+  .animate-pop {
+    animation: pop 0.3s ease-out;
+  }
 }

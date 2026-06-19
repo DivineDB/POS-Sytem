@@ -49,6 +49,8 @@ interface StoreState {
   products: Product[]
   orders: Order[]
   invoiceSettings: InvoiceSettings
+  priceMode: "retail" | "wholesale"
+  setPriceMode: (mode: "retail" | "wholesale") => void
   addCategory: (category: Category) => void
   addProduct: (product: Product) => void
   updateProduct: (id: string, product: Partial<Product>) => void
@@ -207,6 +209,8 @@ export const useStore = create<StoreState>()(
         },
       ],
       orders: [],
+      priceMode: "retail",
+      setPriceMode: (mode) => set({ priceMode: mode }),
       invoiceSettings: {
         businessName: "SSG Store",
         address: "123 Main Street, City, State",

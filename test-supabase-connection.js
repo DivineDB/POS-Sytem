@@ -2,17 +2,12 @@
 // Run this with: node test-supabase-connection.js
 
 const { createClient } = require('@supabase/supabase-js')
-const fetch = require('node-fetch')
 
 // Your Supabase credentials
 const supabaseUrl = 'https://oqpvuvkddyrdyrrtwlfz.supabase.co'
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9xcHZ1dmtkZHlyZHlycnR3bGZ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUxMjI2NTMsImV4cCI6MjA5MDY5ODY1M30.ybmLhFwPvAfSftmV46x4_e2cPiB0UMsVw_gSgp_jprg'
 
-const supabase = createClient(supabaseUrl, supabaseKey, {
-  global: {
-    fetch: fetch
-  }
-})
+const supabase = createClient(supabaseUrl, supabaseKey)
 
 async function testConnection() {
   console.log('🔄 Testing Supabase connection...')
@@ -20,7 +15,7 @@ async function testConnection() {
   try {
     // Test 1: Basic connection
     console.log('\n1️⃣ Testing basic connection...')
-    const { data, error } = await supabase.from('categories').select('count(*)')
+    const { data, error } = await supabase.from('categories').select('id')
     
     if (error) {
       console.log('❌ Connection failed:', error.message)

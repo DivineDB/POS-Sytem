@@ -8,6 +8,7 @@ import { useStore, type Product } from "@/lib/store"
 import { useSupabaseData } from "@/hooks/use-supabase-data"
 import { CategoryService } from "@/lib/category-service"
 import { Plus, Pencil, Trash2, Package } from "lucide-react"
+import { toast } from "sonner"
 
 export default function InventoryPage() {
   const { categories: zustandCategories, products: zustandProducts, addProduct: zustandAddProduct, updateProduct: zustandUpdateProduct, deleteProduct: zustandDeleteProduct, addCategory: zustandAddCategory } = useStore()
@@ -59,17 +60,17 @@ export default function InventoryPage() {
     try {
       if (editingProduct) {
         await updateProduct(editingProduct.id, productData)
-        console.log("✅ Product updated successfully!")
+        toast.success("Product updated successfully!")
       } else {
         await addProduct(productData)
-        console.log("✅ Product added successfully!")
+        toast.success("Product added successfully!")
       }
 
       setShowForm(false)
       setEditingProduct(null)
     } catch (error) {
       console.error("❌ Error saving product:", error)
-      alert("Failed to save product. Please try again.")
+      toast.error("Failed to save product. Please try again.")
     }
   }
 
@@ -84,40 +85,49 @@ export default function InventoryPage() {
       try {
         await addCategory(newCategory)
         setNewCategoryName("")
-        console.log("✅ Category added successfully!")
+        toast.success("Category added successfully!")
       } catch (error) {
         console.error("❌ Error adding category:", error)
-        alert("Failed to add category. Please try again.")
+        toast.error("Failed to add category. Please try again.")
       }
     }
   }
 
-  const handleDeleteCategory = async (categoryId: string) => {
-    console.log("🗑️ Attempting to delete category:", categoryId)
-    
-    if (confirm("Are you sure you want to delete this category? All products in this category will also be deleted.")) {
-      try {
-        // Use Supabase directly if the hook function isn't working
-        if (supabaseCategories.length > 0) {
-          console.log("Using Supabase delete...")
-          const success = await CategoryService.deleteCategory(categoryId)
-          if (success) {
-            console.log("✅ Category deleted successfully from Supabase!")
-            // Reload data to reflect changes
-            window.location.reload()
-          } else {
-            throw new Error("Delete operation returned false")
-          }
+  const executeDeleteCategory = async (categoryId: string) => {
+    try {
+      if (supabaseCategories.length > 0) {
+        console.log("Using Supabase delete...")
+        const success = await CategoryService.deleteCategory(categoryId)
+        if (success) {
+          console.log("✅ Category deleted successfully from Supabase!")
+          toast.success("Category deleted successfully!")
+          setTimeout(() => window.location.reload(), 1000)
         } else {
-          console.log("Using hook delete...")
-          await deleteCategory(categoryId)
-          console.log("✅ Category deleted successfully!")
+          throw new Error("Delete operation returned false")
         }
-      } catch (error) {
-        console.error("❌ Error deleting category:", error)
-        alert("Failed to delete category. Error: " + error)
+      } else {
+        console.log("Using hook delete...")
+        await deleteCategory(categoryId)
+        toast.success("Category deleted successfully!")
       }
+    } catch (error) {
+      console.error("❌ Error deleting category:", error)
+      toast.error("Failed to delete category. Error: " + error)
     }
+  }
+
+  const handleDeleteCategory = (categoryId: string) => {
+    toast("Delete Category?", {
+      description: "All products in this category will also be deleted. This cannot be undone.",
+      action: {
+        label: "Delete",
+        onClick: () => executeDeleteCategory(categoryId),
+      },
+      cancel: {
+        label: "Cancel"
+      },
+      duration: 5000,
+    })
   }
 
   return (

@@ -1,12 +1,15 @@
 "use client"
 
-import { IndianRupee, QrCode, Wallet, Download, ShoppingBag, CreditCard, User } from "lucide-react"
-import { useState } from "react"
+import { IndianRupee, QrCode, Wallet, Download, ShoppingBag, CreditCard, User, Check } from "lucide-react"
+import { useState, useEffect } from "react"
 import { useCart } from "./cart-context"
 import { generateBillPDF } from "@/lib/pdf-generator"
 import { useStore } from "@/lib/store"
 import { BillService } from "@/lib/bill-service"
 import { useAuth } from "@/context/auth-context"
+import { toast } from "sonner"
+import { cn } from "@/lib/utils"
+import { ProductService } from "@/lib/product-service"
 
 type PaymentMethod = "cash" | "online" | "credit"
 
@@ -15,6 +18,7 @@ export function OrderSummary({ priceMode }: { priceMode: "retail" | "wholesale" 
   const { addOrder, incrementProductOrder, decrementStock, invoiceSettings } = useStore()
   const { user } = useAuth()
   const [isGenerating, setIsGenerating] = useState(false)
+  const [isSuccess, setIsSuccess] = useState(false)
 
   const activeProfile = (() => {
     const name = user?.user_metadata?.full_name || user?.email?.split('@')[0] || "Guest"
@@ -28,7 +32,7 @@ export function OrderSummary({ priceMode }: { priceMode: "retail" | "wholesale" 
 
   const handlePlaceOrder = async () => {
     if (items.length === 0) {
-      alert("Please add items to the order")
+      toast.error("Please add items to the order")
       return
     }
 
@@ -48,10 +52,23 @@ export function OrderSummary({ priceMode }: { priceMode: "retail" | "wholesale" 
       }
       addOrder(order)
 
+      // Update local Zustand store
       items.forEach((item) => {
         incrementProductOrder(item.id)
         decrementStock(item.id, item.qty)
       })
+
+      // Update Supabase Database
+      try {
+        await Promise.all(
+          items.map(async (item) => {
+            await ProductService.decrementStock(item.id, item.qty)
+            await ProductService.incrementOrderCount(item.id)
+          })
+        )
+      } catch (dbError) {
+        console.error("Failed to update stock in database:", dbError)
+      }
 
       // Save bill to Supabase
       const billData = await BillService.createBill({
@@ -93,14 +110,41 @@ export function OrderSummary({ priceMode }: { priceMode: "retail" | "wholesale" 
 
       clear()
 
-      alert("Order placed successfully! Bill downloaded and saved to history.")
+      toast.success("Order placed successfully! Bill downloaded and saved to history.")
+      setIsSuccess(true)
+      setTimeout(() => setIsSuccess(false), 1500)
     } catch (error) {
       console.error("Error generating bill:", error)
-      alert("Error generating bill. Please try again.")
+      toast.error("Error generating bill. Please try again.")
     } finally {
       setIsGenerating(false)
     }
   }
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't trigger if user is typing in an input, textarea, select or contenteditable
+      const activeEl = document.activeElement
+      if (
+        activeEl &&
+        (activeEl.tagName === "INPUT" ||
+          activeEl.tagName === "TEXTAREA" ||
+          activeEl.tagName === "SELECT" ||
+          activeEl.getAttribute("contenteditable") === "true")
+      ) {
+        return
+      }
+
+      // Check for Enter key
+      if ((e.key === "Enter" || (e.ctrlKey && e.key === "Enter")) && items.length > 0 && !isGenerating && !isSuccess) {
+        e.preventDefault()
+        handlePlaceOrder()
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown)
+    return () => window.removeEventListener("keydown", handleKeyDown)
+  }, [items, isGenerating, isSuccess, handlePlaceOrder])
 
   return (
     <aside className="pos-panel w-96 shrink-0 p-4 flex flex-col gap-4 h-full">
@@ -130,7 +174,7 @@ export function OrderSummary({ priceMode }: { priceMode: "retail" | "wholesale" 
                     <span className="pos-panel h-6 w-6 rounded-full grid place-items-center text-xs font-medium">{idx + 1}</span>
                     <div className="text-sm">
                       <div className="font-medium">{i.name}</div>
-                      <div className="text-xs text-muted-foreground">Qty: {i.qty}</div>
+                      <div className="text-xs text-muted-foreground">₹{i.price.toFixed(2)} × {i.qty}</div>
                     </div>
                   </div>
                   <div className="font-semibold">₹{(i.price * i.qty).toFixed(2)}</div>
@@ -206,11 +250,25 @@ export function OrderSummary({ priceMode }: { priceMode: "retail" | "wholesale" 
 
             <button
               onClick={handlePlaceOrder}
-              disabled={isGenerating}
-              className="w-full rounded-full py-3 text-center font-medium bg-foreground text-background hover:opacity-90 disabled:opacity-50 transition flex items-center justify-center gap-2 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--pos-brand)] focus-visible:outline-none focus-visible:ring-offset-background"
+              disabled={isGenerating || isSuccess}
+              className={cn(
+                "w-full rounded-full py-3 text-center font-medium transition flex items-center justify-center gap-2 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--pos-brand)] focus-visible:outline-none focus-visible:ring-offset-background cursor-pointer",
+                isSuccess
+                  ? "bg-emerald-600 text-white hover:opacity-100"
+                  : "bg-foreground text-background hover:opacity-90 disabled:opacity-50"
+              )}
             >
-              <Download size={18} />
-              {isGenerating ? "Generating..." : "Place Order"}
+              {isSuccess ? (
+                <>
+                  <Check size={18} />
+                  <span>Order Placed!</span>
+                </>
+              ) : (
+                <>
+                  <Download size={18} />
+                  <span>{isGenerating ? "Generating..." : "Place Order"}</span>
+                </>
+              )}
             </button>
           </div>
         </>

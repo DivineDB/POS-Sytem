@@ -25,6 +25,7 @@ export const viewport: Viewport = {
 
 import { AuthProvider } from "@/context/auth-context"
 import { ThemeProvider } from "@/components/theme-provider"
+import { Toaster } from "sonner"
 
 export default function RootLayout({
   children,
@@ -53,6 +54,7 @@ export default function RootLayout({
           <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
             <AuthProvider>
               {children}
+              <Toaster richColors position="top-right" closeButton />
             </AuthProvider>
           </ThemeProvider>
         </Suspense>

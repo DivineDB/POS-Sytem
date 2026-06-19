@@ -379,16 +379,7 @@ export default function SettingsPage() {
                           </div>
                         </div>
 
-                        {user && (
-                          <div className="flex justify-start pt-2">
-                            <button
-                              onClick={() => signOut()}
-                              className="flex items-center gap-2 border border-red-500/20 bg-red-500/10 hover:bg-red-500/20 text-red-500 dark:text-red-400 px-4 py-2.5 rounded-xl text-sm font-semibold transition cursor-pointer"
-                            >
-                              <LogOut className="w-4 h-4" /> Sign Out from Profile
-                            </button>
-                          </div>
-                        )}
+
                       </div>
 
                       {/* Mocked security elements (Premium visual design) */}

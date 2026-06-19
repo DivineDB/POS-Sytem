@@ -154,7 +154,13 @@ export function useSupabaseData() {
     try {
       const result = await CategoryService.createCategory(category)
       if (result) {
-        setCategories(prev => [...prev, convertSupabaseCategory(result)])
+        const converted = convertSupabaseCategory(result)
+        setCategories(prev => {
+          const updated = [...prev, converted]
+          dataCache.categories = updated
+          saveCacheToStorage(dataCache)
+          return updated
+        })
         return result
       }
     } catch (error) {
@@ -167,9 +173,18 @@ export function useSupabaseData() {
     try {
       const success = await CategoryService.deleteCategory(id)
       if (success) {
-        setCategories(prev => prev.filter(c => c.id !== id))
-        // Also remove products in this category
-        setProducts(prev => prev.filter(p => p.category !== id))
+        setCategories(prev => {
+          const updated = prev.filter(c => c.id !== id)
+          dataCache.categories = updated
+          saveCacheToStorage(dataCache)
+          return updated
+        })
+        setProducts(prev => {
+          const updated = prev.filter(p => p.category !== id)
+          dataCache.products = updated
+          saveCacheToStorage(dataCache)
+          return updated
+        })
       }
       return success
     } catch (error) {
@@ -193,7 +208,13 @@ export function useSupabaseData() {
 
       const result = await ProductService.createProduct(supabaseProduct)
       if (result) {
-        setProducts(prev => [...prev, convertSupabaseProduct(result)])
+        const converted = convertSupabaseProduct(result)
+        setProducts(prev => {
+          const updated = [...prev, converted]
+          dataCache.products = updated
+          saveCacheToStorage(dataCache)
+          return updated
+        })
         return result
       }
     } catch (error) {
@@ -216,7 +237,13 @@ export function useSupabaseData() {
 
       const result = await ProductService.updateProduct(id, supabaseUpdates)
       if (result) {
-        setProducts(prev => prev.map(p => p.id === id ? convertSupabaseProduct(result) : p))
+        const converted = convertSupabaseProduct(result)
+        setProducts(prev => {
+          const updated = prev.map(p => p.id === id ? converted : p)
+          dataCache.products = updated
+          saveCacheToStorage(dataCache)
+          return updated
+        })
         return result
       }
     } catch (error) {
@@ -229,7 +256,12 @@ export function useSupabaseData() {
     try {
       const success = await ProductService.deleteProduct(id)
       if (success) {
-        setProducts(prev => prev.filter(p => p.id !== id))
+        setProducts(prev => {
+          const updated = prev.filter(p => p.id !== id)
+          dataCache.products = updated
+          saveCacheToStorage(dataCache)
+          return updated
+        })
       }
       return success
     } catch (error) {
@@ -241,9 +273,14 @@ export function useSupabaseData() {
   const incrementProductOrder = async (productId: string) => {
     try {
       await ProductService.incrementOrderCount(productId)
-      setProducts(prev => prev.map(p => 
-        p.id === productId ? { ...p, orderCount: p.orderCount + 1 } : p
-      ))
+      setProducts(prev => {
+        const updated = prev.map(p => 
+          p.id === productId ? { ...p, orderCount: p.orderCount + 1 } : p
+        )
+        dataCache.products = updated
+        saveCacheToStorage(dataCache)
+        return updated
+      })
     } catch (error) {
       console.error('Error incrementing order count:', error)
     }
@@ -252,9 +289,14 @@ export function useSupabaseData() {
   const decrementStock = async (productId: string, quantity: number) => {
     try {
       await ProductService.decrementStock(productId, quantity)
-      setProducts(prev => prev.map(p => 
-        p.id === productId ? { ...p, stock: Math.max(0, p.stock - quantity) } : p
-      ))
+      setProducts(prev => {
+        const updated = prev.map(p => 
+          p.id === productId ? { ...p, stock: Math.max(0, p.stock - quantity) } : p
+        )
+        dataCache.products = updated
+        saveCacheToStorage(dataCache)
+        return updated
+      })
     } catch (error) {
       console.error('Error decrementing stock:', error)
     }

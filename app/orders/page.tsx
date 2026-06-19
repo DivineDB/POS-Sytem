@@ -12,10 +12,11 @@ import { useSupabaseData } from "@/hooks/use-supabase-data"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { OrdersLoadingSkeleton } from "@/components/pos/loading-skeleton"
 import { PageTransition } from "@/components/ui/page-transition"
-import { Sparkles, Clock } from "lucide-react"
+import { Sparkles, Clock, ShoppingBag } from "lucide-react"
+import Link from "next/link"
 
 export default function OrdersPage() {
-  const { categories: zustandCategories, products: zustandProducts } = useStore()
+  const { categories: zustandCategories, products: zustandProducts, priceMode, setPriceMode } = useStore()
   const { categories: supabaseCategories, products: supabaseProducts, loading } = useSupabaseData()
   
   // Use Supabase data if available, fallback to Zustand
@@ -24,7 +25,6 @@ export default function OrdersPage() {
   
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState("")
-  const [priceMode, setPriceMode] = useState<"retail" | "wholesale">("retail")
   const [time, setTime] = useState<Date | null>(null)
 
   useEffect(() => {
@@ -109,30 +109,56 @@ export default function OrdersPage() {
 
 
                 {/* Categories */}
-                <div className="grid grid-cols-4 gap-2">
+                <div className="grid grid-cols-5 gap-2">
+                  <CategoryCard
+                    title="All Categories"
+                    items={products.length}
+                    color="tile-mint"
+                    onClick={() => setSelectedCategory(null)}
+                    isSelected={selectedCategory === null}
+                  />
                   {categories.map((c) => (
                     <CategoryCard
                       key={c.id}
                       title={c.name}
                       items={products.filter((p) => p.category === c.id).length}
-                      color={c.color}
+                      color={c.color as any}
                       onClick={() => handleCategoryClick(c.id)}
                       isSelected={selectedCategory === c.id}
                     />
                   ))}
                 </div>
 
-                <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-gray-600 dark:scrollbar-thumb-gray-400">
-                  <div className="grid grid-cols-4 gap-2 pb-2 pr-2">
-                    {filteredProducts.map((p) => (
-                      <ProductCard
-                        key={p.id}
-                        id={p.id}
-                        name={p.name}
-                        price={priceMode === "retail" ? p.retailPrice : p.wholesalePrice}
-                      />
-                    ))}
-                  </div>
+                 <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-track-transparent scrollbar-thumb-gray-600 dark:scrollbar-thumb-gray-400">
+                  {filteredProducts.length === 0 ? (
+                    <div className="h-full flex flex-col items-center justify-center text-center p-8 bg-[var(--pos-panel)] border border-[var(--pos-stroke)] rounded-xl my-2 mr-2">
+                      <div className="p-4 rounded-full bg-muted/50 mb-4">
+                        <ShoppingBag className="w-12 h-12 text-muted-foreground" />
+                      </div>
+                      <h3 className="text-lg font-medium text-foreground">No products found</h3>
+                      <p className="text-sm text-muted-foreground/75 mt-1 max-w-sm">
+                        There are no products matching your selected category or search query. You can add more products in the inventory settings.
+                      </p>
+                      <Link
+                        href="/inventory"
+                        className="mt-5 px-4 py-2 text-sm font-medium bg-pos-brand text-foreground rounded-lg hover:opacity-90 transition"
+                      >
+                        Manage Inventory
+                      </Link>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-4 gap-2 pb-2 pr-2">
+                      {filteredProducts.map((p) => (
+                        <ProductCard
+                          key={p.id}
+                          id={p.id}
+                          name={p.name}
+                          price={priceMode === "retail" ? p.retailPrice : p.wholesalePrice}
+                          stock={p.stock}
+                        />
+                      ))}
+                    </div>
+                  )}
                 </div>
               </section>
 

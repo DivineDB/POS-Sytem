@@ -4,13 +4,40 @@ import { useState, useMemo, useEffect } from "react"
 import { Sidebar } from "@/components/pos/sidebar"
 import { useStore } from "@/lib/store"
 import { TrendingUp, IndianRupee, Package, AlertTriangle, ShoppingCart, Calendar, Clock, Eye, EyeOff } from "lucide-react"
+import { useSupabaseData } from "@/hooks/use-supabase-data"
+import { BillService } from "@/lib/bill-service"
+import { toast } from "sonner"
 
 export default function DashboardPage() {
-  const { products, orders, updateProduct } = useStore()
-  const [priceMode, setPriceMode] = useState<"retail" | "wholesale">("retail")
+  const { products: zustandProducts, orders: zustandOrders, updateProduct: zustandUpdateProduct, priceMode, setPriceMode } = useStore()
+  const { products: supabaseProducts, updateProduct: supabaseUpdateProduct } = useSupabaseData()
+  
+  const [supabaseOrders, setSupabaseOrders] = useState<any[]>([])
+  const [loadingOrders, setLoadingOrders] = useState(true)
+
+  useEffect(() => {
+    const fetchSupabaseOrders = async () => {
+      try {
+        const bills = await BillService.getBills()
+        setSupabaseOrders(bills)
+      } catch (err) {
+        console.error("Error fetching bills for dashboard:", err)
+      } finally {
+        setLoadingOrders(false)
+      }
+    }
+    fetchSupabaseOrders()
+  }, [])
+
+  // Use Supabase data if available, fallback to Zustand
+  const products = supabaseProducts.length > 0 ? supabaseProducts : zustandProducts
+  const orders = supabaseProducts.length > 0 ? supabaseOrders : zustandOrders
+  const updateProduct = supabaseProducts.length > 0 ? supabaseUpdateProduct : zustandUpdateProduct
+
   const [currentTime, setCurrentTime] = useState(new Date())
   const [isProfitHidden, setIsProfitHidden] = useState(true)
   const [isRevenueHidden, setIsRevenueHidden] = useState(true)
+  const [restockQuantities, setRestockQuantities] = useState<Record<string, number>>({})
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 60000)
@@ -25,10 +52,22 @@ export default function DashboardPage() {
     return { totalSales, totalProfit, mostOrdered, lowStock }
   }, [products, orders])
 
-  const handleOrderMore = (productId: string) => {
+  const handleOrderMore = async (productId: string, qty: number) => {
     const product = products.find((p) => p.id === productId)
     if (product) {
-      updateProduct(productId, { stock: product.stock + 50 })
+      try {
+        await updateProduct(productId, { stock: product.stock + qty })
+        toast.success(`Successfully added ${qty} items to ${product.name} stock!`)
+        // Reset local restock quantity state for this product
+        setRestockQuantities(prev => {
+          const updated = { ...prev }
+          delete updated[productId]
+          return updated
+        })
+      } catch (err) {
+        console.error("Error updating stock:", err)
+        toast.error("Failed to update stock. Please try again.")
+      }
     }
   }
 
@@ -196,13 +235,26 @@ export default function DashboardPage() {
                             Threshold: {product.lowStockThreshold}
                           </p>
                         </div>
-                        <button
-                          onClick={() => handleOrderMore(product.id)}
-                          className="flex items-center gap-2 px-4 py-2 bg-pos-brand text-foreground rounded-lg hover:opacity-90 transition"
-                        >
-                          <ShoppingCart className="w-4 h-4" />
-                          Order More
-                        </button>
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="number"
+                            min="1"
+                            value={restockQuantities[product.id] ?? 50}
+                            onChange={(e) => {
+                              const val = parseInt(e.target.value) || 0
+                              setRestockQuantities(prev => ({ ...prev, [product.id]: val }))
+                            }}
+                            className="pos-panel w-20 px-2 py-1 text-sm text-center border border-[var(--pos-stroke)] focus:outline-none focus:ring-2 focus:ring-pos-brand"
+                            aria-label="Restock quantity"
+                          />
+                          <button
+                            onClick={() => handleOrderMore(product.id, restockQuantities[product.id] ?? 50)}
+                            className="flex items-center gap-2 px-4 py-2 bg-pos-brand text-foreground rounded-lg hover:opacity-90 transition cursor-pointer"
+                          >
+                            <ShoppingCart className="w-4 h-4" />
+                            Order More
+                          </button>
+                        </div>
                       </div>
                     ))
                   )}

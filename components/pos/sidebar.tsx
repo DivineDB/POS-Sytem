@@ -97,13 +97,6 @@ export function Sidebar() {
                 <p className="text-[10px] text-foreground/60 truncate">{user.email}</p>
               </div>
             </div>
-            <button
-              onClick={() => signOut()}
-              className="w-full flex items-center justify-center gap-2 min-h-[44px] px-3 rounded-lg border border-red-500/30 bg-red-500/5 hover:bg-red-500/15 text-red-400 text-xs font-semibold transition cursor-pointer focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:outline-none"
-            >
-              <LogOut size={14} />
-              <span>Sign Out</span>
-            </button>
           </div>
         ) : (
           <div className="text-center text-xs text-foreground/40">
