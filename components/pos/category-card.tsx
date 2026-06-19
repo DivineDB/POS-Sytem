@@ -43,8 +43,8 @@ export function CategoryCard({
         </div>
       )}
       <div className={cn(icon ? "mt-8" : "mt-0")}>
-        <div className="font-semibold text-lg text-pretty pr-6">{title}</div>
-        <div className="text-xs opacity-70">{items} items</div>
+        <div className="font-semibold text-lg text-pretty pr-6 h-14 line-clamp-2 flex items-start align-top">{title}</div>
+        <div className="text-xs opacity-70 mt-1">{items} items</div>
       </div>
     </button>
   )
