@@ -176,4 +176,4 @@ MIT — free to use, modify, and deploy.
 
 ---
 
-*Built by DivineLabs · 2026*
+*Built by Divyansh Baghel · 2026*
