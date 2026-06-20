@@ -86,8 +86,10 @@ export function OrderSummary({ priceMode, refetchData }: { priceMode: "retail" |
         total,
       })
 
+      let savedToDb = false
       if (billData) {
         console.log("Bill saved to database:", billData.bill_number)
+        savedToDb = true
       } else {
         console.warn("Failed to save bill to database")
       }
@@ -111,7 +113,11 @@ export function OrderSummary({ priceMode, refetchData }: { priceMode: "retail" |
       clear()
       refetchData?.()
 
-      toast.success("Order placed successfully! Bill downloaded and saved to history.")
+      if (savedToDb) {
+        toast.success("Order placed successfully! Bill downloaded and saved to history.")
+      } else {
+        toast.warning("Order placed and PDF downloaded, but failed to save to database history.")
+      }
       setIsSuccess(true)
       setTimeout(() => setIsSuccess(false), 1500)
     } catch (error) {

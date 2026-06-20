@@ -4,6 +4,7 @@ import React, { createContext, useContext, useEffect, useState } from "react"
 import { User, Session } from "@supabase/supabase-js"
 import { supabase } from "@/lib/supabase"
 import { useRouter, usePathname } from "next/navigation"
+import { toast } from "sonner"
 
 const mockUser: User = {
   id: "00000000-0000-0000-0000-000000000000",
@@ -42,6 +43,7 @@ interface AuthContextType {
   loading: boolean
   signOut: () => Promise<void>
   updateProfileName: (name: string) => Promise<void>
+  switchRole: (role: 'worker' | 'cashier' | 'owner') => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -50,6 +52,7 @@ const AuthContext = createContext<AuthContextType>({
   loading: true,
   signOut: async () => {},
   updateProfileName: async () => {},
+  switchRole: async () => {},
 })
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
@@ -163,16 +166,59 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }
 
+  const switchRole = async (role: 'worker' | 'cashier' | 'owner') => {
+    const names = {
+      worker: "John Worker",
+      cashier: "Sarah Cashier",
+      owner: "Admin Cashier"
+    }
+    const name = names[role]
+
+    if (session && session.user && session.user.id !== "00000000-0000-0000-0000-000000000000") {
+      try {
+        const { data, error } = await supabase.auth.updateUser({
+          data: { 
+            full_name: name,
+            role: role
+          }
+        })
+        if (error) throw error
+        if (data && data.user) {
+          setUser(data.user)
+          toast.success(`Role updated to ${role.charAt(0).toUpperCase() + role.slice(1)}`)
+        }
+      } catch (err: any) {
+        console.error("Failed to update role:", err)
+        toast.error("Failed to update role in Supabase")
+      }
+    } else {
+      localStorage.setItem('ssg_mock_cashier_role', role)
+      localStorage.setItem('ssg_mock_cashier_name', name)
+      setUser(prev => {
+        const baseUser = prev || getPersistedMockUser()
+        return {
+          ...baseUser,
+          user_metadata: {
+            ...baseUser.user_metadata,
+            full_name: name,
+            role: role
+          }
+        }
+      })
+      toast.success(`Switched account to ${role.charAt(0).toUpperCase() + role.slice(1)}: ${name}`)
+    }
+  }
+
   if (loading) {
     return (
-      <div className="h-screen w-screen flex items-center justify-center bg-black">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+      <div className="h-screen w-screen flex items-center justify-center bg-[var(--pos-panel-2)]">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--pos-brand)]"></div>
       </div>
     )
   }
 
   return (
-    <AuthContext.Provider value={{ user: user || getPersistedMockUser(), session, loading, signOut, updateProfileName }}>
+    <AuthContext.Provider value={{ user: user || getPersistedMockUser(), session, loading, signOut, updateProfileName, switchRole }}>
       {children}
     </AuthContext.Provider>
   )

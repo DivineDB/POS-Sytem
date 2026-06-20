@@ -40,11 +40,11 @@ export function ProductCard({
       className={cn(
         "tile p-4 bg-[var(--pos-panel)] text-foreground transition-all duration-300 relative cursor-pointer hover:bg-muted/10", 
         highlight,
-        isOutOfStock && "opacity-60 saturate-50 border-destructive/30 cursor-not-allowed"
+        isOutOfStock && "opacity-60 saturate-50 border-red-500/20 dark:border-red-900/50 cursor-not-allowed"
       )}
     >
       {isOutOfStock && (
-        <span className="absolute top-2 right-2 px-2 py-0.5 rounded text-[10px] font-bold bg-destructive/15 text-destructive border border-destructive/20 uppercase tracking-wider">
+        <span className="absolute top-2 right-2 px-2 py-0.5 rounded text-[10px] font-bold bg-red-100 dark:bg-red-950/60 text-red-750 dark:text-red-300 border border-red-200 dark:border-red-900/40 uppercase tracking-wider">
           Out of Stock
         </span>
       )}

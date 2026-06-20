@@ -21,7 +21,7 @@ export function CategoryList({
           className={cn(
             "px-3 py-2 rounded-lg text-left text-sm transition",
             selectedCategory === cat.id
-              ? "bg-pos-brand text-foreground font-medium"
+              ? "bg-pos-brand text-black font-semibold shadow-sm"
               : "bg-[var(--pos-panel)] text-foreground/70 hover:text-foreground",
           )}
         >

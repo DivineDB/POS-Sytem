@@ -1,65 +1,127 @@
 # Project Context: SSG Store POS System
 
-This document outlines the current state, architecture, and ongoing development tasks for the SSG Store Point of Sale (POS) system.
+Developer reference document. Describes the architecture, file map, and the history of all significant changes made to this codebase.
 
-## 🛠️ Tech Stack & Architecture
+---
 
-- **Frontend Framework**: Next.js (App Router, React 18, TypeScript)
-- **Styling**: TailwindCSS & Global CSS rules
-- **State Management**: Zustand (for persistent local state like categories, products, orders, and invoice settings)
-- **Database & Authentication**: Supabase (PostgreSQL tables for categories, products, bill history; Supabase GoTrue for auth)
-- **PDF Generation**: jsPDF (custom client-side generator)
+## Tech Stack
 
-## 📂 Key Codebase Components
+| Layer | Technology |
+|---|---|
+| Framework | Next.js 15 (App Router, TypeScript) |
+| Styling | Tailwind CSS v4 + custom CSS (globals.css) |
+| State | Zustand (local persistence, offline fallback) |
+| Database | Supabase — PostgreSQL, GoTrue auth |
+| PDF | jsPDF (client-side, no server) |
+| Icons | Lucide React |
+| Package manager | pnpm |
 
-- [app/orders/page.tsx](file:///d:/DBs/codes/posL/POS-Sytem/app/orders/page.tsx): Main Point of Sale ordering screen.
-- [components/pos/order-summary.tsx](file:///d:/DBs/codes/posL/POS-Sytem/components/pos/order-summary.tsx): The right-hand sidebar component displaying current cart items, total price, payment method, and controls to place the order/generate invoice.
-- [components/pos/sidebar.tsx](file:///d:/DBs/codes/posL/POS-Sytem/components/pos/sidebar.tsx): Main navigation sidebar.
-- [lib/store.ts](file:///d:/DBs/codes/posL/POS-Sytem/lib/store.ts): Zustand store for local persistence.
-- [context/auth-context.tsx](file:///d:/DBs/codes/posL/POS-Sytem/context/auth-context.tsx): Supabase authentication context.
+---
 
-### 1. Employee Profile Switcher & Header Cleanup in Order Summary (Completed)
-- **Goal**: Add an employee profile switcher in the `OrderSummary` header and remove the hardcoded "Table 5" label.
-- **Details**:
-  - Replaced the static branch display with an interactive cashier/employee profile switcher dropdown.
-  - Switched the icon to a `User` icon to match the employee theme.
-  - Removed the `"Table 5"` text display from this header section.
-  - Set the active cashier name to be saved to the database and printed on PDF receipts under `CASHIER:` instead of `TABLE:`.
-  - Added conditional label handling (`CASHIER` or `TABLE`) in both the PDF receipt and the bill history sharing text.
+## Key File Map
 
-### 2. Minimal Date & Time Widget on Orders Page (Completed)
-- **Goal**: Render a minimal real-time date and time display on the orders page.
-- **Details**:
-  - Added a dynamic real-time clock widget next to the search bar on [orders/page.tsx](file:///d:/DBs/codes/posL/POS-Sytem/app/orders/page.tsx).
-  - Formatted the widget with a subtle badge styling containing calendar date and 12-hour clock time.
+| File | Role |
+|---|---|
+| [app/orders/page.tsx](file:///d:/DBs/codes/posL/POS-Sytem/app/orders/page.tsx) | Main POS ordering screen |
+| [app/inventory/page.tsx](file:///d:/DBs/codes/posL/POS-Sytem/app/inventory/page.tsx) | Product & category management |
+| [app/dashboard/page.tsx](file:///d:/DBs/codes/posL/POS-Sytem/app/dashboard/page.tsx) | Analytics, quick actions, recent transactions |
+| [app/bill-history/page.tsx](file:///d:/DBs/codes/posL/POS-Sytem/app/bill-history/page.tsx) | Transaction history, filters, share/export |
+| [app/settings/page.tsx](file:///d:/DBs/codes/posL/POS-Sytem/app/settings/page.tsx) | Business config and invoice settings |
+| [app/login/page.tsx](file:///d:/DBs/codes/posL/POS-Sytem/app/login/page.tsx) | Auth — sign in / sign up with role selection |
+| [app/globals.css](file:///d:/DBs/codes/posL/POS-Sytem/app/globals.css) | Design tokens, dark/light theme, utility classes |
+| [components/pos/sidebar.tsx](file:///d:/DBs/codes/posL/POS-Sytem/components/pos/sidebar.tsx) | Navigation sidebar, account switcher, role guard |
+| [components/pos/order-summary.tsx](file:///d:/DBs/codes/posL/POS-Sytem/components/pos/order-summary.tsx) | Cart panel, payment method, place order |
+| [components/pos/product-card.tsx](file:///d:/DBs/codes/posL/POS-Sytem/components/pos/product-card.tsx) | Product tile with quantity controls |
+| [components/pos/category-card.tsx](file:///d:/DBs/codes/posL/POS-Sytem/components/pos/category-card.tsx) | Category filter chip |
+| [lib/store.ts](file:///d:/DBs/codes/posL/POS-Sytem/lib/store.ts) | Zustand store — products, categories, orders, invoice settings |
+| [lib/supabase.ts](file:///d:/DBs/codes/posL/POS-Sytem/lib/supabase.ts) | Supabase client + type definitions for DB tables |
+| [lib/bill-service.ts](file:///d:/DBs/codes/posL/POS-Sytem/lib/bill-service.ts) | Supabase CRUD for bill_history |
+| [lib/pdf-generator.ts](file:///d:/DBs/codes/posL/POS-Sytem/lib/pdf-generator.ts) | jsPDF invoice builder |
+| [context/auth-context.tsx](file:///d:/DBs/codes/posL/POS-Sytem/context/auth-context.tsx) | Supabase auth session, user metadata, switchRole() |
+| [hooks/use-supabase-data.ts](file:///d:/DBs/codes/posL/POS-Sytem/hooks/use-supabase-data.ts) | Data fetching hook with 5-min cache and Zustand fallback |
 
-### 3. Role Integration & Login-based Auto Profile Update (Completed)
-- **Goal**: Add user roles, allow selecting role during signup, and automatically load logged-in user details in the active cashier profile switcher.
-- **Details**:
-  - **Login Schema Update**: Added a role selection field (`Owner` / `Cashier`) to the register form in [login/page.tsx](file:///d:/DBs/codes/posL/POS-Sytem/app/login/page.tsx). The selected role is saved as `role` inside the Supabase `user_metadata` schema.
-  - **Auto Sync**: Imported `useAuth` into [order-summary.tsx](file:///d:/DBs/codes/posL/POS-Sytem/components/pos/order-summary.tsx) and added a `useEffect` hook to automatically set the `activeProfile` to `${full_name} (${role})` based on the active Supabase session.
-  - **Manual Switcher Fallback**: Retained the cashier selector list as a fallback menu to allow employees to quickly switch to another cashier if needed without signing out completely.
+---
 
+## Design System
 
-### 4. Database Schema and Checkout Fixes (Completed)
-- **Goal**: Resolve database insert failures during checkouts.
-- **Details**:
-  - Added the missing `payment_method` column to the `bill_history` table in the database schema.
-  - Altered the `table_number` field constraint from `VARCHAR(20)` to `VARCHAR(100)` to prevent SQL overflows when cashier names (e.g., `"Admin Cashier (Owner)"`, 21 chars) exceed the length limit.
+### Color Tokens (globals.css)
+- `--pos-brand` — mint green, primary CTA and active states
+- `--pos-accent-blue`, `--pos-accent-purple`, `--pos-accent-pink` — secondary accents for tiles and badges
+- `--pos-panel` — card/panel background (adapts light/dark)
+- `--pos-panel-2` — deeper background layer
+- `--pos-stroke` — border color
 
-### 5. UI Alignment & Card Clipping Fixes (Completed)
-- **Goal**: Fix outline corner clipping on selected category cards and align category cards grid layout.
-- **Details**:
-  - Replaced high-contrast outer shadow rings (`ring-2`) on selected category cards with internal borders (`border-2 border-foreground p-[15px]`) to eliminate outline corner clipping caused by parent `overflow-hidden`.
-  - Standardized all category cards' name and items count layouts by setting a fixed height (`h-14`) and `line-clamp-2` on card titles in [category-card.tsx](file:///d:/DBs/codes/posL/POS-Sytem/components/pos/category-card.tsx).
+### Utility Classes
+- `.pos-panel` — glass-card style panel (background + border + radius)
+- `.tile`, `.tile-mint`, `.tile-blue`, `.tile-purple`, `.tile-pink` — coloured category tiles
+- `.animate-pop` — 300ms scale pop for add-to-cart feedback
 
-### 6. Unified Category Deletion Support (Completed)
-- **Goal**: Enable fully working category deletion across both Supabase and Guest modes.
-- **Details**:
-  - Implemented the `deleteCategory` method in the Zustand store in [store.ts](file:///d:/DBs/codes/posL/POS-Sytem/lib/store.ts) to support offline mode deletion and automatically cascade delete products in that category.
-  - Linked the inventory view's delete action in [inventory/page.tsx](file:///d:/DBs/codes/posL/POS-Sytem/app/inventory/page.tsx) directly to `deleteCategory` (hook or Zustand) to immediately update client state and clear the local persistent data cache without needing page reloads.
+### Roles
+Three roles stored in `user_metadata.role`:
+- `owner` — full access to all pages
+- `cashier` — orders + bill history only
+- `worker` — inventory only
 
-### 7. Hosted Platform Resiliency (Completed)
-- **Goal**: Prevent hosted site crashes due to missing environment variables.
-- **Details**:
-  - Configured hardcoded public Supabase URL and Anon Key as fallback values inside [supabase.ts](file:///d:/DBs/codes/posL/POS-Sytem/lib/supabase.ts) so the application connects automatically on platforms like Vercel even if env keys are not explicitly set in the dashboard.
+Role enforcement is handled in `sidebar.tsx` via `currentAllowed` paths. Auto-redirect fires in a `useEffect` when the current path is not in the allowed list.
+
+---
+
+## Changelog
+
+### 1. Employee Profile Switcher & Order Attribution
+- Replaced hardcoded "Table 5" label with the logged-in user's full name and role
+- Active profile string (`Name (Role)`) saved to `table_number` in `bill_history` and printed on PDF under `CASHIER:`
+- Conditional label handling — shows `CASHIER:` if the value doesn't contain "table", otherwise `TABLE:`
+
+### 2. Real-Time Clock on Orders Page
+- Live date + time widget next to the search bar on the orders screen
+- Updates every second via `setInterval`, hydration-safe (null until client mounts)
+
+### 3. Role-Based Access Control
+- Role selection added to the sign-up form (`Owner` / `Cashier` / `Worker`)
+- Sidebar filters navigation items based on role, redirects on unauthorized access
+- Account switcher in the sidebar bottom — switches role in `user_metadata` without sign-out
+- Three pre-configured demo accounts in the switcher: Admin (Owner), Sarah (Cashier), John (Worker)
+
+### 4. Database Schema Fixes
+- Added `payment_method` column to `bill_history`
+- Widened `table_number` from `VARCHAR(20)` to `VARCHAR(100)` to fit full cashier name strings
+- Confirmed RLS policies allow authenticated insert/select on all tables
+
+### 5. Category Card Ring Clipping Fix
+- Replaced `ring-2` selected state with `border-2 border-foreground p-[15px]` to avoid outline clipping from `overflow-hidden` on the parent tile
+
+### 6. Category Deletion with Cascade
+- `deleteCategory` added to Zustand store — cascades product deletion in offline mode
+- Wired up in `inventory/page.tsx` with a confirmation toast before delete
+
+### 7. Supabase Env Fallback
+- Hardcoded public Supabase URL and anon key as fallback values in `lib/supabase.ts`
+- Prevents crash on hosted deployments (e.g., Vercel) where env vars may not be set
+
+### 8. Inventory Page — Slide-Over Drawer
+- Add/Edit Product form moved into a right-side slide-over drawer (`fixed inset-0` + `slide-in-from-right`)
+- Backdrop click closes the drawer; form resets on close
+- Drawer shows category name in the header subtitle for context
+
+### 9. Bill History — Share Modal
+- Share button on each bill opens a formatted text preview modal
+- Options: **Copy to Clipboard**, **WhatsApp** (deep link), **Web Share API** (mobile native)
+- Summary share button for the entire filtered result set
+
+### 10. Dashboard Improvements
+- Stats cards with hidden-by-default revenue/profit (Eye toggle)
+- Recent transactions feed — click any row to open a bill preview modal with download
+- Low stock depletion gauge bars with per-product restock quantity input
+- Role-aware Quick Actions Dock — different buttons for Owner, Cashier, Worker
+
+### 11. Light/Dark Mode Audit
+- All hardcoded colors replaced with CSS variable equivalents or `dark:` variants
+- Avatar backgrounds use `--pos-brand`, `--pos-accent-purple`, `--pos-accent-blue` by role
+- Inactive nav items restored with `hover:bg-foreground/[0.06] hover:text-foreground`
+- Share tile icons use `text-neutral-800 dark:text-neutral-900` for contrast on pastel backgrounds
+- Action buttons in inventory, bill history, and dashboard verified in both modes
+
+### 12. Keyboard Shortcut — Place Order
+- Pressing `Enter` (or `Ctrl+Enter`) on the orders page submits the order when the cart is non-empty
+- Guard prevents trigger when focus is inside an input, textarea, or select

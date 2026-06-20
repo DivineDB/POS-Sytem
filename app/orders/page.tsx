@@ -91,7 +91,7 @@ export default function OrdersPage() {
                     <button
                       onClick={() => setPriceMode("retail")}
                       className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
-                        priceMode === "retail" ? "bg-pos-brand text-foreground" : "text-muted-foreground"
+                        priceMode === "retail" ? "bg-pos-brand text-black font-semibold" : "text-muted-foreground"
                       }`}
                     >
                       Retail
@@ -99,7 +99,7 @@ export default function OrdersPage() {
                     <button
                       onClick={() => setPriceMode("wholesale")}
                       className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
-                        priceMode === "wholesale" ? "bg-pos-brand text-foreground" : "text-muted-foreground"
+                        priceMode === "wholesale" ? "bg-pos-brand text-black font-semibold" : "text-muted-foreground"
                       }`}
                     >
                       Wholesale
@@ -141,7 +141,7 @@ export default function OrdersPage() {
                       </p>
                       <Link
                         href="/inventory"
-                        className="mt-5 px-4 py-2 text-sm font-medium bg-pos-brand text-foreground rounded-lg hover:opacity-90 transition"
+                        className="mt-5 px-4 py-2 text-sm font-semibold bg-pos-brand text-black rounded-lg hover:opacity-90 transition"
                       >
                         Manage Inventory
                       </Link>

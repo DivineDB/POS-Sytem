@@ -31,7 +31,7 @@ export function InventoryHeader({ onAddCategory }: { onAddCategory: (name: strin
           />
           <button
             type="submit"
-            className="px-4 py-2 bg-pos-brand text-foreground rounded-lg hover:opacity-90 transition"
+            className="px-4 py-2 bg-pos-brand text-black font-semibold rounded-lg hover:opacity-90 transition"
           >
             Add
           </button>

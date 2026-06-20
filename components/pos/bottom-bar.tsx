@@ -22,7 +22,7 @@ export function BottomBar() {
                 </div>
               </div>
             </div>
-            <span className="rounded-full bg-emerald-600/30 text-emerald-300 text-xs px-2 py-1">{t.badge}</span>
+            <span className="rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-100 dark:border-emerald-900/20 text-xs px-2.5 py-1 font-bold">{t.badge}</span>
           </div>
         ))}
       </div>

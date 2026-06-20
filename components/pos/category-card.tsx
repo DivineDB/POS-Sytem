@@ -31,8 +31,8 @@ export function CategoryCard({
       onClick={onClick}
     >
       {isSelected && (
-        <span className="absolute top-2 right-2 p-0.5 rounded-full bg-foreground/20 text-foreground">
-          <Check className="h-3.5 w-3.5" />
+        <span className="absolute top-2 right-2 p-0.5 rounded-full bg-current/15 text-current">
+          <Check className="h-3.5 w-3.5 stroke-[2.5]" />
         </span>
       )}
       {icon && (

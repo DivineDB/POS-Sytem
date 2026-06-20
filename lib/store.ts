@@ -38,7 +38,7 @@ export interface InvoiceSettings {
   titleLabel: string
   taxRate: number
   footerNote: string
-  paperSize: "A4" | "58mm"
+  paperSize: "A4" | "80mm" | "58mm"
   showItemPrice: boolean
   showQuantity: boolean
   showLineTotal: boolean

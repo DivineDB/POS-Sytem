@@ -43,7 +43,7 @@ export function ProductList({
               className="p-2 hover:bg-red-500/20 rounded-lg transition"
               aria-label="Delete product"
             >
-              <Trash2 size={18} className="text-red-500" />
+              <Trash2 size={18} className="text-red-600 dark:text-red-400" />
             </button>
           </div>
         </div>

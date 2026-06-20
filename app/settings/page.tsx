@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from "react"
 import { Sidebar } from "@/components/pos/sidebar"
-import { Moon, Sun, Globe, Bell, User, Shield, Receipt, LogOut, Check, Save, Sparkles } from "lucide-react"
+import { Moon, Sun, Globe, Bell, User, Shield, Receipt, LogOut, Check, Save, Sparkles, ChevronDown } from "lucide-react"
 import { useStore } from "@/lib/store"
 import { useAuth } from "@/context/auth-context"
 import { useTheme } from "next-themes"
+import { cn } from "@/lib/utils"
 
 type TabType = "business" | "preferences" | "account"
 
@@ -20,6 +21,9 @@ export default function SettingsPage() {
   const [showToast, setShowToast] = useState(false)
   const [fullName, setFullName] = useState(user?.user_metadata?.full_name || "")
   const [updatingProfile, setUpdatingProfile] = useState(false)
+  const [isTitleOpen, setIsTitleOpen] = useState(false)
+  const [isPaperOpen, setIsPaperOpen] = useState(false)
+  const [isLanguageOpen, setIsLanguageOpen] = useState(false)
 
   useEffect(() => {
     if (user?.user_metadata?.full_name) {
@@ -182,17 +186,39 @@ export default function SettingsPage() {
                           />
                         </div>
 
-                        <div className="space-y-2">
-                          <label htmlFor="title-label" className="text-xs font-semibold text-muted-foreground uppercase tracking-wider cursor-pointer">Title Label</label>
-                          <select
+                        <div className="space-y-2 relative">
+                          <label htmlFor="title-label" className="text-xs font-semibold text-muted-foreground uppercase tracking-wider cursor-pointer block">Title Label</label>
+                          {isTitleOpen && <div className="fixed inset-0 z-40" onClick={() => setIsTitleOpen(false)} />}
+                          <button
                             id="title-label"
-                            value={invoiceSettings.titleLabel}
-                            onChange={(e) => updateInvoiceSettings({ titleLabel: e.target.value })}
-                            className="w-full bg-[var(--pos-panel)] border border-foreground/10 rounded-xl px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-[var(--pos-brand)] focus-visible:ring-2 focus-visible:ring-[var(--pos-brand)] focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                            type="button"
+                            onClick={() => { setIsTitleOpen(!isTitleOpen); setIsPaperOpen(false); setIsLanguageOpen(false); }}
+                            className="w-full pos-panel flex items-center justify-between gap-2 px-3 py-2 rounded-lg border border-[var(--pos-stroke)] bg-[var(--pos-panel)] active:bg-muted/50 transition cursor-pointer text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[var(--pos-brand)] z-10 text-left"
                           >
-                            <option value="Invoice">Invoice</option>
-                            <option value="Bill Receipt">Bill Receipt</option>
-                          </select>
+                            <span>{invoiceSettings.titleLabel || "Invoice"}</span>
+                            <ChevronDown className="h-4 w-4 opacity-50 shrink-0" />
+                          </button>
+                          {isTitleOpen && (
+                            <div className="absolute top-full left-0 right-0 mt-1 bg-[var(--pos-panel)] border border-[var(--pos-stroke)] rounded-xl shadow-lg z-50 py-1 animate-in fade-in slide-in-from-top-2 duration-150">
+                              {[
+                                { value: "Invoice", label: "Invoice" },
+                                { value: "Bill Receipt", label: "Bill Receipt" }
+                              ].map((opt) => (
+                                <button
+                                  key={opt.value}
+                                  type="button"
+                                  onClick={() => {
+                                    updateInvoiceSettings({ titleLabel: opt.value })
+                                    setIsTitleOpen(false)
+                                    triggerSaveFeedback()
+                                  }}
+                                  className={`w-full text-left px-4 py-2 text-sm active:bg-muted transition cursor-pointer ${invoiceSettings.titleLabel === opt.value ? 'bg-pos-brand/10 text-emerald-600 dark:text-emerald-400 font-semibold' : 'text-foreground/80'}`}
+                                >
+                                  {opt.label}
+                                </button>
+                              ))}
+                            </div>
+                          )}
                         </div>
 
                         <div className="space-y-2">
@@ -211,17 +237,44 @@ export default function SettingsPage() {
                           />
                         </div>
 
-                        <div className="space-y-2">
-                          <label htmlFor="paper-size" className="text-xs font-semibold text-muted-foreground uppercase tracking-wider cursor-pointer">Paper Size</label>
-                          <select
+                        <div className="space-y-2 relative">
+                          <label htmlFor="paper-size" className="text-xs font-semibold text-muted-foreground uppercase tracking-wider cursor-pointer block">Paper Size</label>
+                          {isPaperOpen && <div className="fixed inset-0 z-40" onClick={() => setIsPaperOpen(false)} />}
+                          <button
                             id="paper-size"
-                            value={invoiceSettings.paperSize}
-                            onChange={(e) => updateInvoiceSettings({ paperSize: e.target.value as any })}
-                            className="w-full bg-[var(--pos-panel)] border border-foreground/10 rounded-xl px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-[var(--pos-brand)] focus-visible:ring-2 focus-visible:ring-[var(--pos-brand)] focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                            type="button"
+                            onClick={() => { setIsPaperOpen(!isPaperOpen); setIsTitleOpen(false); setIsLanguageOpen(false); }}
+                            className="w-full pos-panel flex items-center justify-between gap-2 px-3 py-2 rounded-lg border border-[var(--pos-stroke)] bg-[var(--pos-panel)] active:bg-muted/50 transition cursor-pointer text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[var(--pos-brand)] z-10 text-left"
                           >
-                            <option value="A4">A4 (Standard)</option>
-                            <option value="58mm">58mm (Thermal Printer)</option>
-                          </select>
+                            <span>
+                              {invoiceSettings.paperSize === "A4" ? "A4 (Standard Invoice)" :
+                               invoiceSettings.paperSize === "80mm" ? "80mm (Standard Thermal)" :
+                               "58mm (Compact Thermal)"}
+                            </span>
+                            <ChevronDown className="h-4 w-4 opacity-50 shrink-0" />
+                          </button>
+                          {isPaperOpen && (
+                            <div className="absolute top-full left-0 right-0 mt-1 bg-[var(--pos-panel)] border border-[var(--pos-stroke)] rounded-xl shadow-lg z-50 py-1 animate-in fade-in slide-in-from-top-2 duration-150">
+                              {[
+                                { value: "A4", label: "A4 (Standard Invoice)" },
+                                { value: "80mm", label: "80mm (Standard Thermal)" },
+                                { value: "58mm", label: "58mm (Compact Thermal)" }
+                              ].map((opt) => (
+                                <button
+                                  key={opt.value}
+                                  type="button"
+                                  onClick={() => {
+                                    updateInvoiceSettings({ paperSize: opt.value as any })
+                                    setIsPaperOpen(false)
+                                    triggerSaveFeedback()
+                                  }}
+                                  className={`w-full text-left px-4 py-2 text-sm active:bg-muted transition cursor-pointer ${invoiceSettings.paperSize === opt.value ? 'bg-pos-brand/10 text-emerald-600 dark:text-emerald-400 font-semibold' : 'text-foreground/80'}`}
+                                >
+                                  {opt.label}
+                                </button>
+                              ))}
+                            </div>
+                          )}
                         </div>
 
                         <div className="space-y-2 md:col-span-2">
@@ -302,23 +355,45 @@ export default function SettingsPage() {
                           </div>
                         </div>
 
-                        <button
-                          onClick={toggleTheme}
-                          className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors bg-[var(--pos-brand)] focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--pos-brand)] focus-visible:outline-none focus-visible:ring-offset-background"
-                          role="switch"
-                          aria-checked={currentTheme === "dark"}
-                          aria-label="Toggle dark theme"
-                        >
-                          <span
-                            className={`inline-block h-4 w-4 transform rounded-full bg-black transition-transform duration-200 ${
-                              currentTheme === "dark" ? "translate-x-6" : "translate-x-1"
-                            }`}
-                          />
-                        </button>
+                        {/* Theme Segmented Switch Control */}
+                        <div className="flex p-1 bg-foreground/5 rounded-xl border border-foreground/10 shrink-0">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setTheme("light")
+                              triggerSaveFeedback()
+                            }}
+                            className={cn(
+                              "flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer",
+                              currentTheme === "light"
+                                ? "bg-white text-black shadow-sm font-bold animate-pop"
+                                : "text-muted-foreground hover:text-foreground"
+                            )}
+                          >
+                            <Sun className="w-3.5 h-3.5" />
+                            <span>Light</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setTheme("dark")
+                              triggerSaveFeedback()
+                            }}
+                            className={cn(
+                              "flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer",
+                              currentTheme === "dark"
+                                ? "bg-[var(--pos-brand)] text-black shadow-sm font-bold animate-pop"
+                                : "text-muted-foreground hover:text-foreground"
+                            )}
+                          >
+                            <Moon className="w-3.5 h-3.5" />
+                            <span>Dark</span>
+                          </button>
+                        </div>
                       </div>
 
                       {/* Language selection selection */}
-                      <div className="flex items-center justify-between p-4 rounded-xl bg-foreground/[0.02] border border-foreground/5">
+                      <div className="flex items-center justify-between p-4 rounded-xl bg-foreground/[0.02] border border-foreground/5 relative">
                         <div className="flex items-center gap-4">
                           <div className="p-2.5 rounded-lg bg-green-500/10">
                             <Globe className="w-5 h-5 text-green-500" />
@@ -329,20 +404,46 @@ export default function SettingsPage() {
                           </div>
                         </div>
 
-                        <select
-                          id="language-select"
-                          value={language}
-                          onChange={(e) => {
-                            setLanguage(e.target.value)
-                            triggerSaveFeedback()
-                          }}
-                          className="bg-[var(--pos-panel)] border border-foreground/10 rounded-xl px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-[var(--pos-brand)] focus-visible:ring-2 focus-visible:ring-[var(--pos-brand)] focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-                        >
-                          <option value="en">English (US)</option>
-                          <option value="hi">Hindi (हिन्दी)</option>
-                          <option value="ta">Tamil (தமிழ்)</option>
-                          <option value="te">Telugu (తెలుగు)</option>
-                        </select>
+                        <div className="relative min-w-[150px]">
+                          {isLanguageOpen && <div className="fixed inset-0 z-40" onClick={() => setIsLanguageOpen(false)} />}
+                          <button
+                            id="language-select"
+                            type="button"
+                            onClick={() => { setIsLanguageOpen(!isLanguageOpen); setIsTitleOpen(false); setIsPaperOpen(false); }}
+                            className="w-full pos-panel flex items-center justify-between gap-2 px-3 py-2 rounded-lg border border-[var(--pos-stroke)] bg-[var(--pos-panel)] active:bg-muted/50 transition cursor-pointer text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[var(--pos-brand)] z-10 text-left"
+                          >
+                            <span>
+                              {language === "en" ? "English (US)" :
+                               language === "hi" ? "Hindi (हिन्दी)" :
+                               language === "ta" ? "Tamil (தமிழ்)" :
+                               "Telugu (తెలుగు)"}
+                            </span>
+                            <ChevronDown className="h-4 w-4 opacity-50 shrink-0" />
+                          </button>
+                          {isLanguageOpen && (
+                            <div className="absolute top-full right-0 mt-1 w-40 bg-[var(--pos-panel)] border border-[var(--pos-stroke)] rounded-xl shadow-lg z-50 py-1 animate-in fade-in slide-in-from-top-2 duration-150">
+                              {[
+                                { value: "en", label: "English (US)" },
+                                { value: "hi", label: "Hindi (हिन्दी)" },
+                                { value: "ta", label: "Tamil (தமிழ்)" },
+                                { value: "te", label: "Telugu (తెలుగు)" }
+                              ].map((opt) => (
+                                <button
+                                  key={opt.value}
+                                  type="button"
+                                  onClick={() => {
+                                    setLanguage(opt.value)
+                                    setIsLanguageOpen(false)
+                                    triggerSaveFeedback()
+                                  }}
+                                  className={`w-full text-left px-4 py-2 text-sm active:bg-muted transition cursor-pointer ${language === opt.value ? 'bg-pos-brand/10 text-emerald-600 dark:text-emerald-400 font-semibold' : 'text-foreground/80'}`}
+                                >
+                                  {opt.label}
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                        </div>
                       </div>
 
                       {/* Stock alerts notifications */}

@@ -7,8 +7,9 @@ import { Sidebar } from "@/components/pos/sidebar"
 import { useStore, type Product } from "@/lib/store"
 import { useSupabaseData } from "@/hooks/use-supabase-data"
 import { CategoryService } from "@/lib/category-service"
-import { Plus, Pencil, Trash2, Package } from "lucide-react"
+import { Plus, Pencil, Trash2, Package, Search, X, AlertTriangle } from "lucide-react"
 import { toast } from "sonner"
+import { cn } from "@/lib/utils"
 
 export default function InventoryPage() {
   const { categories: zustandCategories, products: zustandProducts, addProduct: zustandAddProduct, updateProduct: zustandUpdateProduct, deleteProduct: zustandDeleteProduct, addCategory: zustandAddCategory, deleteCategory: zustandDeleteCategory } = useStore()
@@ -36,10 +37,13 @@ export default function InventoryPage() {
   const [showForm, setShowForm] = useState(false)
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
   const [newCategoryName, setNewCategoryName] = useState("")
+  const [searchQuery, setSearchQuery] = useState("")
 
   const filteredProducts = useMemo(
-    () => products.filter((p) => p.category === selectedCategory),
-    [products, selectedCategory],
+    () => products.filter((p) => p.category === selectedCategory && (
+      !searchQuery || p.name.toLowerCase().includes(searchQuery.toLowerCase())
+    )),
+    [products, selectedCategory, searchQuery],
   )
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -156,7 +160,7 @@ export default function InventoryPage() {
                     />
                     <button
                       onClick={handleAddCategory}
-                      className="px-4 py-2 bg-pos-brand text-foreground rounded-lg hover:opacity-90 transition"
+                      className="px-4 py-2 bg-pos-brand text-black font-semibold rounded-lg hover:opacity-90 transition"
                     >
                       Add Category
                     </button>
@@ -178,7 +182,7 @@ export default function InventoryPage() {
                           onClick={() => setSelectedCategory(cat.id)}
                           className={`flex-1 text-left px-3 py-2 rounded-lg transition ${
                             selectedCategory === cat.id
-                              ? "bg-pos-brand text-foreground"
+                              ? "bg-pos-brand text-black font-semibold shadow-sm"
                               : "hover:bg-[var(--pos-panel)] text-muted-foreground"
                           }`}
                         >
@@ -199,146 +203,127 @@ export default function InventoryPage() {
                 {/* Products list */}
                 <div className="flex-1 flex flex-col gap-4 overflow-hidden">
                   <div className="pos-panel p-4 rounded-lg">
-                    <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center justify-between flex-wrap gap-3 mb-4">
                       <div className="flex items-center gap-2">
-                        <Package className="w-5 h-5 text-purple-500" />
-                        <h2 className="text-lg font-semibold">
-                          {categories.find((c) => c.id === selectedCategory)?.name} Products
+                        <Package className="w-5 h-5 text-[var(--pos-accent-purple)]" />
+                        <h2 className="text-lg font-bold">
+                          {categories.find((c) => c.id === selectedCategory)?.name || "Category"} Products
                         </h2>
                       </div>
-                      <button
-                        onClick={() => {
-                          setEditingProduct(null)
-                          setShowForm(true)
-                        }}
-                        className="flex items-center gap-2 px-4 py-2 bg-pos-brand text-foreground rounded-lg hover:opacity-90 transition"
-                      >
-                        <Plus className="w-4 h-4" />
-                        Add Product
-                      </button>
-                    </div>
-
-                    {showForm && (
-                      <div className="pos-panel p-4 rounded-lg mb-4 border-l-4 border-green-500">
-                        <div className="flex items-center gap-2 mb-3">
-                          <Plus className="w-4 h-4 text-green-500" />
-                          <h3 className="font-semibold">{editingProduct ? "Edit Product" : "Add New Product"}</h3>
+                      <div className="flex items-center gap-3">
+                        <div className="relative">
+                          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                          <input
+                            type="text"
+                            placeholder="Search products..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="pos-panel pl-9 pr-8 py-2 rounded-xl border border-[var(--pos-stroke)] bg-[var(--pos-panel-2)] focus:outline-none focus:ring-2 focus:ring-pos-brand text-sm w-44 sm:w-52 transition-all"
+                          />
+                          {searchQuery && (
+                            <button
+                              type="button"
+                              onClick={() => setSearchQuery("")}
+                              className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 hover:bg-foreground/5 rounded-full text-muted-foreground hover:text-foreground transition"
+                            >
+                              <X className="h-3 w-3" />
+                            </button>
+                          )}
                         </div>
-                        <form onSubmit={handleSubmit} className="space-y-3">
-                      <input
-                        name="name"
-                        placeholder="Product Name"
-                        defaultValue={editingProduct?.name}
-                        required
-                        className="w-full pos-panel px-3 py-2 rounded-lg border border-[var(--pos-stroke)] focus:outline-none focus:ring-2 focus:ring-pos-brand"
-                      />
-                      <div className="grid grid-cols-2 gap-3">
-                        <input
-                          name="retailPrice"
-                          type="number"
-                          placeholder="Retail Price"
-                          defaultValue={editingProduct?.retailPrice}
-                          required
-                          className="pos-panel px-3 py-2 rounded-lg border border-[var(--pos-stroke)] focus:outline-none focus:ring-2 focus:ring-pos-brand"
-                        />
-                        <input
-                          name="wholesalePrice"
-                          type="number"
-                          placeholder="Wholesale Price"
-                          defaultValue={editingProduct?.wholesalePrice}
-                          required
-                          className="pos-panel px-3 py-2 rounded-lg border border-[var(--pos-stroke)] focus:outline-none focus:ring-2 focus:ring-pos-brand"
-                        />
-                        <input
-                          name="stock"
-                          type="number"
-                          placeholder="Stock Quantity"
-                          defaultValue={editingProduct?.stock}
-                          required
-                          className="pos-panel px-3 py-2 rounded-lg border border-[var(--pos-stroke)] focus:outline-none focus:ring-2 focus:ring-pos-brand"
-                        />
-                        <input
-                          name="lowStockThreshold"
-                          type="number"
-                          placeholder="Low Stock Threshold"
-                          defaultValue={editingProduct?.lowStockThreshold}
-                          required
-                          className="pos-panel px-3 py-2 rounded-lg border border-[var(--pos-stroke)] focus:outline-none focus:ring-2 focus:ring-pos-brand"
-                        />
-                      </div>
-                      <div className="flex gap-2">
                         <button
-                          type="submit"
-                          className="px-4 py-2 bg-pos-brand text-foreground rounded-lg hover:opacity-90 transition"
-                        >
-                          {editingProduct ? "Update" : "Add"} Product
-                        </button>
-                        <button
-                          type="button"
                           onClick={() => {
-                            setShowForm(false)
                             setEditingProduct(null)
+                            setShowForm(true)
                           }}
-                          className="px-4 py-2 pos-panel border border-[var(--pos-stroke)] rounded-lg hover:bg-[var(--pos-panel)] transition"
+                          className="flex items-center gap-2 px-4 py-2 bg-pos-brand text-black font-bold rounded-xl active:scale-[0.98] transition cursor-pointer shadow-sm hover:opacity-90"
                         >
-                          Cancel
+                          <Plus className="w-4 h-4" />
+                          <span>Add Product</span>
                         </button>
-                        </div>
-                      </form>
                       </div>
-                    )}
+                    </div>
 
                     <div className="space-y-2">
                       {filteredProducts.length === 0 ? (
-                        <div className="pos-panel p-8 rounded-lg text-center">
-                          <Package className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                          <p className="text-lg font-medium text-muted-foreground">No products found</p>
-                          <p className="text-sm text-muted-foreground/60 mt-1">
-                            Add your first product to get started
+                        <div className="pos-panel p-8 rounded-xl text-center bg-[var(--pos-panel-2)]/30 border border-dashed border-[var(--pos-stroke)]">
+                          <Package className="w-12 h-12 text-muted-foreground/50 mx-auto mb-4" />
+                          <p className="text-base font-semibold text-foreground">No products found</p>
+                          <p className="text-xs text-muted-foreground/60 mt-1">
+                            {searchQuery ? "Try refining your search query" : "Add your first product to get started"}
                           </p>
                         </div>
                       ) : (
-                        filteredProducts.map((product) => (
-                          <div key={product.id} className="pos-panel p-4 rounded-lg flex items-center justify-between hover:bg-[var(--pos-panel)] transition-colors">
-                            <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-                                <Package className="w-5 h-5 text-white" />
+                        filteredProducts.map((product) => {
+                          const isLowStock = product.stock <= product.lowStockThreshold
+                          return (
+                            <div 
+                              key={product.id} 
+                              className={cn(
+                                "p-4 rounded-xl flex items-center justify-between border transition-all duration-200",
+                                isLowStock 
+                                  ? "bg-red-500/5 border-red-500/20 shadow-[0_0_15px_-5px_rgba(239,68,68,0.15)] animate-pulse-slow" 
+                                  : "pos-panel hover:bg-foreground/[0.01]"
+                              )}
+                            >
+                              <div className="flex items-center gap-3">
+                                <div className={cn(
+                                  "w-10 h-10 rounded-xl flex items-center justify-center transition-transform",
+                                  isLowStock 
+                                    ? "bg-red-500/10 text-red-600 dark:text-red-400" 
+                                    : "bg-blue-500/10 text-blue-600 dark:text-blue-400"
+                                )}>
+                                  {isLowStock ? (
+                                    <AlertTriangle className="w-5 h-5 animate-pulse" />
+                                  ) : (
+                                    <Package className="w-5 h-5" />
+                                  )}
+                                </div>
+                                <div>
+                                  <div className="flex items-center gap-2">
+                                    <p className="font-semibold text-sm text-foreground">{product.name}</p>
+                                    {isLowStock && (
+                                      <span className="px-1.5 py-0.5 rounded-full text-[8px] font-bold bg-red-500/15 text-red-600 dark:text-red-400 border border-red-500/25 uppercase tracking-wide">
+                                        Low Stock
+                                      </span>
+                                    )}
+                                  </div>
+                                  <p className="text-xs text-muted-foreground mt-0.5">
+                                    Retail: ₹{product.retailPrice} • Wholesale: ₹{product.wholesalePrice} • Stock:{" "}
+                                    <span className={cn(
+                                      "font-bold",
+                                      isLowStock 
+                                        ? "text-red-600 dark:text-red-400" 
+                                        : "text-emerald-600 dark:text-emerald-400"
+                                    )}>
+                                      {product.stock}
+                                    </span>
+                                    <span className="text-muted-foreground/30 mx-1.5">•</span>
+                                    <span>Min: {product.lowStockThreshold}</span>
+                                  </p>
+                                </div>
                               </div>
-                              <div>
-                                <p className="font-medium">{product.name}</p>
-                                <p className="text-sm text-muted-foreground">
-                                  Retail: ₹{product.retailPrice} • Wholesale: ₹{product.wholesalePrice} • Stock:{" "}
-                                  <span className={`font-medium ${
-                                    product.stock <= product.lowStockThreshold 
-                                      ? "text-red-500" 
-                                      : "text-green-500"
-                                  }`}>
-                                    {product.stock}
-                                  </span>
-                                </p>
+                              <div className="flex gap-1.5">
+                                <button
+                                  onClick={() => {
+                                    setEditingProduct(product)
+                                    setShowForm(true)
+                                  }}
+                                  className="p-2 text-blue-600 dark:text-blue-400 bg-blue-500/5 hover:bg-blue-500/10 active:scale-[0.9] border border-blue-500/10 rounded-xl transition duration-150 cursor-pointer min-h-[36px] min-w-[36px] flex items-center justify-center"
+                                  title="Edit Product"
+                                >
+                                  <Pencil className="w-3.5 h-3.5" />
+                                </button>
+                                <button
+                                  onClick={() => deleteProduct(product.id)}
+                                  className="p-2 text-red-600 dark:text-red-450 bg-red-500/5 hover:bg-red-500/10 active:scale-[0.9] border border-red-500/10 rounded-xl transition duration-150 cursor-pointer min-h-[36px] min-w-[36px] flex items-center justify-center"
+                                  title="Delete Product"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
                               </div>
                             </div>
-                            <div className="flex gap-2">
-                              <button
-                                onClick={() => {
-                                  setEditingProduct(product)
-                                  setShowForm(true)
-                                }}
-                                className="p-2 hover:bg-blue-100 dark:hover:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg transition"
-                                title="Edit Product"
-                              >
-                                <Pencil className="w-4 h-4" />
-                              </button>
-                              <button
-                                onClick={() => deleteProduct(product.id)}
-                                className="p-2 hover:bg-red-100 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg transition"
-                                title="Delete Product"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </button>
-                            </div>
-                          </div>
-                        ))
+                          )
+                        })
                       )}
                     </div>
                   </div>
@@ -348,6 +333,132 @@ export default function InventoryPage() {
           </div>
         </div>
       </div>
+
+      {/* Slide-over Side Drawer for Add/Edit Product */}
+      {showForm && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex justify-end z-50 animate-in fade-in duration-200">
+          {/* Click outside overlay */}
+          <div className="absolute inset-0" onClick={() => { setShowForm(false); setEditingProduct(null); }} />
+          
+          {/* Drawer content */}
+          <div className="relative w-full max-w-md bg-[var(--pos-panel)] border-l border-[var(--pos-stroke)] h-full p-6 flex flex-col gap-6 shadow-2xl animate-in slide-in-from-right duration-300">
+            <div className="flex items-center justify-between pb-3 border-b border-[var(--pos-stroke)]">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2.5 rounded-xl bg-[var(--pos-brand)]/10 text-[var(--pos-brand)] flex items-center justify-center">
+                  <Package className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-base text-foreground">{editingProduct ? "Edit Product Details" : "Add New Product"}</h3>
+                  <p className="text-[11px] font-medium text-muted-foreground mt-0.5">Category: {categories.find((c) => c.id === selectedCategory)?.name || "N/A"}</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowForm(false)
+                  setEditingProduct(null)
+                }}
+                className="p-1.5 hover:bg-muted active:bg-muted rounded-xl transition text-muted-foreground hover:text-foreground active:scale-95 cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmit} className="flex-1 flex flex-col gap-5 overflow-y-auto px-1.5 py-1">
+              <div className="space-y-2">
+                <label htmlFor="prod-name" className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">Product Name</label>
+                <input
+                  id="prod-name"
+                  name="name"
+                  placeholder="e.g. Cold Brew Coffee"
+                  defaultValue={editingProduct?.name}
+                  required
+                  className="w-full bg-foreground/5 border border-foreground/10 rounded-xl px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-pos-brand transition"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label htmlFor="prod-retail" className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">Retail Price (₹)</label>
+                  <input
+                    id="prod-retail"
+                    name="retailPrice"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    placeholder="e.g. 150"
+                    defaultValue={editingProduct?.retailPrice}
+                    required
+                    className="w-full bg-foreground/5 border border-foreground/10 rounded-xl px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-pos-brand transition"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label htmlFor="prod-wholesale" className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">Wholesale Price (₹)</label>
+                  <input
+                    id="prod-wholesale"
+                    name="wholesalePrice"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    placeholder="e.g. 120"
+                    defaultValue={editingProduct?.wholesalePrice}
+                    required
+                    className="w-full bg-foreground/5 border border-foreground/10 rounded-xl px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-pos-brand transition"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label htmlFor="prod-stock" className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">Stock Quantity</label>
+                  <input
+                    id="prod-stock"
+                    name="stock"
+                    type="number"
+                    min="0"
+                    placeholder="e.g. 100"
+                    defaultValue={editingProduct?.stock}
+                    required
+                    className="w-full bg-foreground/5 border border-foreground/10 rounded-xl px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-pos-brand transition"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label htmlFor="prod-threshold" className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">Low Stock Alert</label>
+                  <input
+                    id="prod-threshold"
+                    name="lowStockThreshold"
+                    type="number"
+                    min="0"
+                    placeholder="e.g. 10"
+                    defaultValue={editingProduct?.lowStockThreshold}
+                    required
+                    className="w-full bg-foreground/5 border border-foreground/10 rounded-xl px-4 py-2.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-pos-brand transition"
+                  />
+                </div>
+              </div>
+
+              <div className="mt-auto pt-6 border-t border-[var(--pos-stroke)] flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowForm(false)
+                    setEditingProduct(null)
+                  }}
+                  className="flex-1 py-3 text-center rounded-xl pos-panel border border-[var(--pos-stroke)] bg-foreground/[0.02] dark:bg-foreground/[0.04] text-foreground hover:bg-muted text-sm font-semibold transition active:scale-[0.98] cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 py-3 text-center rounded-xl bg-pos-brand text-black text-sm font-bold transition active:scale-[0.98] cursor-pointer shadow-md shadow-[var(--pos-brand)]/10"
+                >
+                  {editingProduct ? "Save Changes" : "Create Product"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </main>
   )
 }
