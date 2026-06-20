@@ -156,7 +156,7 @@ export function OrderSummary({ priceMode, refetchData }: { priceMode: "retail" |
   return (
     <aside className="pos-panel w-96 shrink-0 p-4 flex flex-col gap-4 h-full">
       <header className="flex items-center gap-1.5 shrink-0 pb-2 border-b border-[var(--pos-stroke)]">
-        <User className="w-3.5 h-3.5 text-[var(--pos-brand)] shrink-0" />
+        <User className="w-3.5 h-3.5 text-[var(--pos-brand-text)] shrink-0" />
         <span className="text-sm font-semibold text-foreground truncate">{activeProfile}</span>
       </header>
 
@@ -167,7 +167,7 @@ export function OrderSummary({ priceMode, refetchData }: { priceMode: "retail" |
           </div>
           <div>
             <p className="text-lg font-medium text-muted-foreground">Cart is empty</p>
-            <p className="text-sm text-muted-foreground/60 mt-1">Add items to place an order</p>
+            <p className="text-sm text-muted-foreground mt-1">Add items to place an order</p>
           </div>
         </div>
       ) : (
@@ -219,10 +219,10 @@ export function OrderSummary({ priceMode, refetchData }: { priceMode: "retail" |
                 <button
                   onClick={() => setPaymentMethod("cash")}
                   aria-pressed={paymentMethod === "cash"}
-                  className={`rounded-xl min-h-[52px] text-sm flex flex-col items-center justify-center gap-1.5 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--pos-brand)] focus-visible:outline-none focus-visible:ring-offset-background border-2 ${
+                  className={`rounded-xl min-h-[52px] text-sm flex flex-col items-center justify-center gap-1.5 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--pos-brand-text)] focus-visible:outline-none focus-visible:ring-offset-background border-2 ${
                     paymentMethod === "cash"
-                      ? "border-[var(--pos-brand)] bg-muted/40 text-foreground scale-[1.02] shadow-sm"
-                      : "border-[var(--pos-stroke)] bg-[var(--pos-panel)] text-foreground/60 hover:text-foreground hover:scale-[1.01]"
+                      ? "border-[var(--pos-brand-text)] bg-muted/40 text-foreground shadow-sm"
+                      : "border-[var(--pos-stroke)] bg-[var(--pos-panel)] text-muted-foreground active:text-foreground"
                   }`}
                 >
                   <IndianRupee className="h-4 w-4" />
@@ -231,10 +231,10 @@ export function OrderSummary({ priceMode, refetchData }: { priceMode: "retail" |
                 <button
                   onClick={() => setPaymentMethod("online")}
                   aria-pressed={paymentMethod === "online"}
-                  className={`rounded-xl min-h-[52px] text-sm flex flex-col items-center justify-center gap-1.5 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--pos-brand)] focus-visible:outline-none focus-visible:ring-offset-background border-2 ${
+                  className={`rounded-xl min-h-[52px] text-sm flex flex-col items-center justify-center gap-1.5 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--pos-brand-text)] focus-visible:outline-none focus-visible:ring-offset-background border-2 ${
                     paymentMethod === "online"
-                      ? "border-[var(--pos-brand)] bg-muted/40 text-foreground scale-[1.02] shadow-sm"
-                      : "border-[var(--pos-stroke)] bg-[var(--pos-panel)] text-foreground/60 hover:text-foreground hover:scale-[1.01]"
+                      ? "border-[var(--pos-brand-text)] bg-muted/40 text-foreground shadow-sm"
+                      : "border-[var(--pos-stroke)] bg-[var(--pos-panel)] text-muted-foreground active:text-foreground"
                   }`}
                 >
                   <QrCode className="h-4 w-4" />
@@ -243,10 +243,10 @@ export function OrderSummary({ priceMode, refetchData }: { priceMode: "retail" |
                 <button
                   onClick={() => setPaymentMethod("credit")}
                   aria-pressed={paymentMethod === "credit"}
-                  className={`rounded-xl min-h-[52px] text-sm flex flex-col items-center justify-center gap-1.5 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--pos-brand)] focus-visible:outline-none focus-visible:ring-offset-background border-2 ${
+                  className={`rounded-xl min-h-[52px] text-sm flex flex-col items-center justify-center gap-1.5 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--pos-brand-text)] focus-visible:outline-none focus-visible:ring-offset-background border-2 ${
                     paymentMethod === "credit"
-                      ? "border-[var(--pos-brand)] bg-muted/40 text-foreground scale-[1.02] shadow-sm"
-                      : "border-[var(--pos-stroke)] bg-[var(--pos-panel)] text-foreground/60 hover:text-foreground hover:scale-[1.01]"
+                      ? "border-[var(--pos-brand-text)] bg-muted/40 text-foreground shadow-sm"
+                      : "border-[var(--pos-stroke)] bg-[var(--pos-panel)] text-muted-foreground active:text-foreground"
                   }`}
                 >
                   <CreditCard className="h-4 w-4" />
@@ -259,7 +259,7 @@ export function OrderSummary({ priceMode, refetchData }: { priceMode: "retail" |
               onClick={handlePlaceOrder}
               disabled={isGenerating || isSuccess}
               className={cn(
-                "w-full rounded-full py-3 text-center font-medium transition flex items-center justify-center gap-2 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--pos-brand)] focus-visible:outline-none focus-visible:ring-offset-background cursor-pointer",
+                "w-full rounded-full py-3 text-center font-medium transition flex items-center justify-center gap-2 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--pos-brand-text)] focus-visible:outline-none focus-visible:ring-offset-background cursor-pointer",
                 isSuccess
                   ? "bg-emerald-600 text-white hover:opacity-100"
                   : "bg-foreground text-background hover:opacity-90 disabled:opacity-50"

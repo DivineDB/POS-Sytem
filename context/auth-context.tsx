@@ -11,7 +11,7 @@ const mockUser: User = {
   email: "guest@ssgstore.com",
   app_metadata: {},
   user_metadata: {
-    full_name: "Admin Cashier",
+    full_name: "Divyansh (Owner)",
     role: "owner"
   },
   aud: "authenticated",
@@ -168,9 +168,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const switchRole = async (role: 'worker' | 'cashier' | 'owner') => {
     const names = {
-      worker: "John Worker",
-      cashier: "Sarah Cashier",
-      owner: "Admin Cashier"
+      worker: "Rakesh (Worker)",
+      cashier: "Sumit (Cashier)",
+      owner: "Divyansh (Owner)"
     }
     const name = names[role]
 

@@ -218,7 +218,7 @@ export default function LoginPage() {
               setError(null)
               setMessage(null)
             }}
-            className="text-[var(--pos-brand)] hover:underline font-medium focus:outline-none"
+            className="text-[var(--pos-brand-text)] hover:underline font-medium focus:outline-none"
           >
             {isSignUp ? "Sign In" : "Register"}
           </button>

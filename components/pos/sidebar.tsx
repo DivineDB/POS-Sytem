@@ -117,8 +117,12 @@ export function Sidebar() {
             {/* Avatar & User Details */}
             <div className="flex items-center gap-2 min-w-0 flex-1">
               <div className={cn(
-                "h-8 w-8 rounded-full text-[oklch(0.15_0_0)] flex items-center justify-center font-bold text-xs uppercase shrink-0 shadow-inner",
-                role === 'cashier' ? 'bg-[var(--pos-accent-purple)]' : role === 'worker' ? 'bg-[var(--pos-accent-blue)]' : 'bg-[var(--pos-brand)]'
+                "h-8 w-8 rounded-full flex items-center justify-center font-bold text-xs uppercase shrink-0 shadow-inner border",
+                role === 'cashier' 
+                  ? 'bg-[var(--pos-accent-purple)]/15 text-[var(--pos-accent-purple-text)] border-[var(--pos-accent-purple)]/30' 
+                  : role === 'worker' 
+                    ? 'bg-[var(--pos-accent-blue)]/15 text-[var(--pos-accent-blue-text)] border-[var(--pos-accent-blue)]/30' 
+                    : 'bg-[var(--pos-brand)]/15 text-[var(--pos-brand-text)] border-[var(--pos-brand)]/30'
               )}>
                 {(user.user_metadata?.full_name || user.email)?.charAt(0)}
               </div>
@@ -126,7 +130,7 @@ export function Sidebar() {
                 <p className="text-xs font-semibold text-foreground truncate">
                   {user.user_metadata?.full_name || user.email?.split('@')[0]}
                 </p>
-                <p className="text-[10px] text-foreground/60 truncate">
+                <p className="text-[10px] text-muted-foreground truncate">
                   {user.user_metadata?.role ? user.user_metadata.role.charAt(0).toUpperCase() + user.user_metadata.role.slice(1) : 'Owner'}
                 </p>
               </div>
@@ -136,7 +140,7 @@ export function Sidebar() {
             <button
               type="button"
               onClick={() => setIsOpen(!isOpen)}
-              className="p-2 bg-[var(--pos-panel-2)] active:bg-foreground/5 text-foreground/80 border border-[var(--pos-stroke)] rounded-lg transition duration-200 cursor-pointer shadow-sm group focus:outline-none focus:ring-2 focus:ring-[var(--pos-brand)] shrink-0 flex items-center justify-center"
+              className="p-2 bg-[var(--pos-panel-2)] active:bg-foreground/5 text-foreground/80 border border-[var(--pos-stroke)] rounded-lg transition duration-200 cursor-pointer shadow-sm group focus:outline-none focus:ring-2 focus:ring-[var(--pos-brand-text)] shrink-0 flex items-center justify-center"
               title="Switch Account"
             >
               <ChevronDown className={cn("h-3.5 w-3.5 transition-transform duration-200 opacity-60 group-active:opacity-100", isOpen && "rotate-180")} />
@@ -146,9 +150,9 @@ export function Sidebar() {
             {isOpen && (
               <div className="absolute bottom-full mb-2 right-0 w-56 bg-[var(--pos-panel)] border border-[var(--pos-stroke)] rounded-xl shadow-2xl p-1.5 z-50 flex flex-col gap-1 animate-in slide-in-from-bottom-2 duration-200">
                 {[
-                  { role: 'owner', name: 'Admin Cashier', title: 'Owner', initials: 'AC', desc: 'Full administration', color: 'bg-[var(--pos-brand)] text-[oklch(0.15_0_0)]', dot: 'bg-[var(--pos-brand)]' },
-                  { role: 'cashier', name: 'Sarah Cashier', title: 'Cashier', initials: 'SC', desc: 'Sales & orders', color: 'bg-[var(--pos-accent-purple)] text-[oklch(0.15_0_0)]', dot: 'bg-[var(--pos-accent-purple)]' },
-                  { role: 'worker', name: 'John Worker', title: 'Worker', initials: 'JW', desc: 'Inventory management', color: 'bg-[var(--pos-accent-blue)] text-[oklch(0.15_0_0)]', dot: 'bg-[var(--pos-accent-blue)]' },
+                  { role: 'owner', name: 'Divyansh', title: 'Owner', initials: 'DB', desc: 'Full administration', color: 'bg-[var(--pos-brand)]/15 text-[var(--pos-brand-text)] border border-[var(--pos-brand)]/30', dot: 'bg-[var(--pos-brand-text)]' },
+                  { role: 'cashier', name: 'Sumit', title: 'Cashier', initials: 'SU', desc: 'Sales & orders', color: 'bg-[var(--pos-accent-purple)]/15 text-[var(--pos-accent-purple-text)] border border-[var(--pos-accent-purple)]/30', dot: 'bg-[var(--pos-accent-purple-text)]' },
+                  { role: 'worker', name: 'Rakesh', title: 'Worker', initials: 'RA', desc: 'Inventory management', color: 'bg-[var(--pos-accent-blue)]/15 text-[var(--pos-accent-blue-text)] border border-[var(--pos-accent-blue)]/30', dot: 'bg-[var(--pos-accent-blue-text)]' },
                 ].map((acc) => {
                   const isActive = (user.user_metadata?.role || 'owner') === acc.role;
                   return (
@@ -193,7 +197,7 @@ export function Sidebar() {
             Offline Mode
           </div>
         )}
-        <div className="text-[10px] text-foreground/60 text-center mt-3">© 2026 DivineLabs</div>
+        <div className="text-[10px] text-muted-foreground text-center mt-3">Made by Divyansh Baghel</div>
       </div>
     </aside>
   )

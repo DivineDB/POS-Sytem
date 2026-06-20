@@ -15,7 +15,7 @@
   --secondary: hsl(215 15% 93%);
   --secondary-foreground: oklch(0.205 0 0);
   --muted: hsl(215 15% 93%);
-  --muted-foreground: oklch(0.42 0 0);
+  --muted-foreground: oklch(0.38 0.01 200);
   --accent: hsl(215 25% 85%);
   --accent-foreground: oklch(0.205 0 0);
   --destructive: hsl(0 84.2% 60.2%);
@@ -42,6 +42,12 @@
   --pos-accent-pink: oklch(0.94 0.06 10);
   --pos-accent-blue: oklch(0.94 0.04 235);
   --pos-accent-purple: oklch(0.94 0.05 295);
+  /* High contrast text tokens for Light Mode (WCAG AA Compliant) */
+  --pos-brand-text: oklch(0.42 0.12 160);
+  --pos-accent-pink-text: oklch(0.45 0.14 15);
+  --pos-accent-blue-text: oklch(0.42 0.15 240);
+  --pos-accent-purple-text: oklch(0.42 0.15 300);
+  
   --pos-panel: oklch(0.98 0.01 200); /* Soft off-white blue-gray */
   --pos-panel-2: oklch(0.94 0.01 200); /* Light slate backing */
   --pos-stroke: oklch(0.88 0.01 200); /* Soft gray-border accent */
@@ -61,7 +67,7 @@
   --secondary: oklch(0.269 0 0);
   --secondary-foreground: oklch(0.985 0 0);
   --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.76 0 0);
+  --muted-foreground: oklch(0.78 0 0);
   --accent: oklch(0.269 0 0);
   --accent-foreground: oklch(0.985 0 0);
   --destructive: oklch(0.396 0.141 25.722);
@@ -89,6 +95,12 @@
   --pos-accent-pink: oklch(0.86 0.1 15);
   --pos-accent-blue: oklch(0.88 0.07 235);
   --pos-accent-purple: oklch(0.87 0.07 300);
+  /* High contrast text tokens for Dark Mode (same as standard) */
+  --pos-brand-text: oklch(0.83 0.08 160);
+  --pos-accent-pink-text: oklch(0.86 0.1 15);
+  --pos-accent-blue-text: oklch(0.88 0.07 235);
+  --pos-accent-purple-text: oklch(0.87 0.07 300);
+  
   --scrollbar-thumb: rgba(255, 255, 255, 0.15);
   --scrollbar-hover: rgba(255, 255, 255, 0.25);
 }
@@ -136,6 +148,10 @@
   --color-pos-accent-pink: var(--pos-accent-pink);
   --color-pos-accent-blue: var(--pos-accent-blue);
   --color-pos-accent-purple: var(--pos-accent-purple);
+  --color-pos-brand-text: var(--pos-brand-text);
+  --color-pos-accent-pink-text: var(--pos-accent-pink-text);
+  --color-pos-accent-blue-text: var(--pos-accent-blue-text);
+  --color-pos-accent-purple-text: var(--pos-accent-purple-text);
   --color-pos-stroke: var(--pos-stroke);
 }
 

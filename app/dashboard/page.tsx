@@ -224,21 +224,21 @@ export default function DashboardPage() {
                     <>
                       <Link 
                         href="/orders" 
-                        className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-pos-brand hover:opacity-90 text-black text-xs font-bold transition duration-200 hover:scale-[1.02] shadow-md shadow-[var(--pos-brand)]/10"
+                        className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-pos-brand hover:opacity-90 text-black text-xs font-bold transition duration-200 shadow-md shadow-[var(--pos-brand)]/10"
                       >
                         <ShoppingCart className="w-4 h-4" />
                         <span>New Order</span>
                       </Link>
                       <Link 
                         href="/inventory" 
-                        className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[var(--pos-stroke)] bg-foreground/[0.02] dark:bg-foreground/[0.04] hover:bg-foreground/[0.05] text-xs font-semibold transition duration-200 hover:scale-[1.02]"
+                        className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[var(--pos-stroke)] bg-foreground/[0.02] dark:bg-foreground/[0.04] hover:bg-foreground/[0.05] text-xs font-semibold transition duration-200"
                       >
                         <Package className="w-4 h-4 text-purple-600 dark:text-purple-400" />
                         <span>Manage Inventory</span>
                       </Link>
                       <button 
                         onClick={triggerReportPrint}
-                        className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[var(--pos-stroke)] bg-foreground/[0.02] dark:bg-foreground/[0.04] hover:bg-foreground/[0.05] text-xs font-semibold transition duration-200 hover:scale-[1.02] cursor-pointer"
+                        className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[var(--pos-stroke)] bg-foreground/[0.02] dark:bg-foreground/[0.04] hover:bg-foreground/[0.05] text-xs font-semibold transition duration-200 cursor-pointer"
                       >
                         <FileText className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                         <span>Daily Report</span>
@@ -250,21 +250,21 @@ export default function DashboardPage() {
                     <>
                       <Link 
                         href="/orders" 
-                        className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-pos-brand hover:opacity-90 text-black text-xs font-bold transition duration-200 hover:scale-[1.02] shadow-md shadow-[var(--pos-brand)]/10"
+                        className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-pos-brand hover:opacity-90 text-black text-xs font-bold transition duration-200 shadow-md shadow-[var(--pos-brand)]/10"
                       >
                         <ShoppingCart className="w-4 h-4" />
                         <span>Create Invoice</span>
                       </Link>
                       <button 
                         onClick={triggerDrawerOpen}
-                        className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[var(--pos-stroke)] bg-foreground/[0.02] dark:bg-foreground/[0.04] hover:bg-foreground/[0.05] text-xs font-semibold transition duration-200 hover:scale-[1.02] cursor-pointer"
+                        className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[var(--pos-stroke)] bg-foreground/[0.02] dark:bg-foreground/[0.04] hover:bg-foreground/[0.05] text-xs font-semibold transition duration-200 cursor-pointer"
                       >
                         <IndianRupee className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                         <span>Open Drawer</span>
                       </button>
                       <Link 
                         href="/bill-history" 
-                        className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[var(--pos-stroke)] bg-foreground/[0.02] dark:bg-foreground/[0.04] hover:bg-foreground/[0.05] text-xs font-semibold transition duration-200 hover:scale-[1.02]"
+                        className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[var(--pos-stroke)] bg-foreground/[0.02] dark:bg-foreground/[0.04] hover:bg-foreground/[0.05] text-xs font-semibold transition duration-200"
                       >
                         <Receipt className="w-4 h-4 text-orange-600 dark:text-orange-400" />
                         <span>Bill History</span>
@@ -276,14 +276,14 @@ export default function DashboardPage() {
                     <>
                       <Link 
                         href="/inventory" 
-                        className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-pos-brand hover:opacity-90 text-black text-xs font-bold transition duration-200 hover:scale-[1.02] shadow-md shadow-[var(--pos-brand)]/10"
+                        className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-pos-brand hover:opacity-90 text-black text-xs font-bold transition duration-200 shadow-md shadow-[var(--pos-brand)]/10"
                       >
                         <PlusCircle className="w-4 h-4" />
                         <span>Add Product</span>
                       </Link>
                       <button 
                         onClick={triggerLabelsPrint}
-                        className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[var(--pos-stroke)] bg-foreground/[0.02] dark:bg-foreground/[0.04] hover:bg-foreground/[0.05] text-xs font-semibold transition duration-200 hover:scale-[1.02] cursor-pointer"
+                        className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[var(--pos-stroke)] bg-foreground/[0.02] dark:bg-foreground/[0.04] hover:bg-foreground/[0.05] text-xs font-semibold transition duration-200 cursor-pointer"
                       >
                         <Printer className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                         <span>Print Barcodes</span>
@@ -296,9 +296,9 @@ export default function DashboardPage() {
               {/* Stats Cards Grid with glow effects and sparklines */}
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                 {/* Total Revenue */}
-                <div className="pos-panel p-4 rounded-xl flex flex-col justify-between hover:shadow-lg transition-all duration-300 relative group overflow-hidden bg-gradient-to-b from-[var(--pos-panel)] to-background/50">
+                <div className="pos-panel p-4 rounded-xl flex flex-col justify-between transition-all duration-300 relative group overflow-hidden bg-gradient-to-b from-[var(--pos-panel)] to-background/50">
                   <div className="flex items-center gap-2">
-                    <IndianRupee className="h-5 w-5 text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform duration-200" />
+                    <IndianRupee className="h-5 w-5 text-blue-600 dark:text-blue-400 transition-transform duration-200" />
                     <span className="text-xs font-semibold text-muted-foreground">Total Revenue</span>
                     <button
                       type="button"
@@ -316,9 +316,9 @@ export default function DashboardPage() {
                 </div>
 
                 {/* Total Profit */}
-                <div className="pos-panel p-4 rounded-xl flex flex-col justify-between hover:shadow-lg transition-all duration-300 relative group overflow-hidden bg-gradient-to-b from-[var(--pos-panel)] to-background/50">
+                <div className="pos-panel p-4 rounded-xl flex flex-col justify-between transition-all duration-300 relative group overflow-hidden bg-gradient-to-b from-[var(--pos-panel)] to-background/50">
                   <div className="flex items-center gap-2">
-                    <TrendingUp className="h-5 w-5 text-emerald-600 dark:text-emerald-400 group-hover:scale-110 transition-transform duration-200" />
+                    <TrendingUp className="h-5 w-5 text-emerald-600 dark:text-emerald-400 transition-transform duration-200" />
                     <span className="text-xs font-semibold text-muted-foreground">Total Profit (30%)</span>
                     <button
                       type="button"
@@ -336,18 +336,18 @@ export default function DashboardPage() {
                 </div>
 
                 {/* Total Orders */}
-                <div className="pos-panel p-4 rounded-xl flex flex-col justify-between hover:shadow-lg transition-all duration-300 relative group overflow-hidden bg-gradient-to-b from-[var(--pos-panel)] to-background/50">
+                <div className="pos-panel p-4 rounded-xl flex flex-col justify-between transition-all duration-300 relative group overflow-hidden bg-gradient-to-b from-[var(--pos-panel)] to-background/50">
                   <div className="flex items-center gap-2">
-                    <ShoppingCart className="h-5 w-5 text-purple-600 dark:text-purple-400 group-hover:scale-110 transition-transform duration-200" />
+                    <ShoppingCart className="h-5 w-5 text-purple-600 dark:text-purple-400 transition-transform duration-200" />
                     <span className="text-xs font-semibold text-muted-foreground">Total Orders</span>
                   </div>
                   <div className="text-2xl font-black mt-2 tracking-tight">{orders.length}</div>
                 </div>
 
                 {/* Low Stock Items */}
-                <div className="pos-panel p-4 rounded-xl flex flex-col justify-between hover:shadow-lg transition-all duration-300 relative group overflow-hidden bg-gradient-to-b from-[var(--pos-panel)] to-background/50">
+                <div className="pos-panel p-4 rounded-xl flex flex-col justify-between transition-all duration-300 relative group overflow-hidden bg-gradient-to-b from-[var(--pos-panel)] to-background/50">
                   <div className="flex items-center gap-2">
-                    <AlertTriangle className="h-5 w-5 text-orange-600 dark:text-orange-400 group-hover:scale-110 transition-transform duration-200" />
+                    <AlertTriangle className="h-5 w-5 text-orange-600 dark:text-orange-400 transition-transform duration-200" />
                     <span className="text-xs font-semibold text-muted-foreground">Low Stock Alerts</span>
                   </div>
                   <div className="text-2xl font-black mt-2 tracking-tight">{analytics.lowStock.length}</div>
@@ -367,7 +367,7 @@ export default function DashboardPage() {
                         <TrendingUp className="w-5 h-5 text-emerald-500" />
                         <h2 className="text-lg font-semibold">Product Sales Share</h2>
                       </div>
-                      <Link href="/orders" className="text-xs text-[var(--pos-brand)] hover:underline font-semibold cursor-pointer">
+                      <Link href="/orders" className="text-xs text-[var(--pos-brand-text)] hover:underline font-semibold cursor-pointer">
                         Add Order
                       </Link>
                     </div>
@@ -376,7 +376,7 @@ export default function DashboardPage() {
                       {analytics.mostOrdered.map((product, index) => {
                         const sharePct = Math.round((product.orderCount / maxOrders) * 100)
                         return (
-                          <div key={product.id} className="flex flex-col gap-1.5 p-3 rounded-xl bg-foreground/[0.01] border border-[var(--pos-stroke)] hover:bg-foreground/[0.03] transition duration-200">
+                          <div key={product.id} className="flex flex-col gap-1.5 p-3 rounded-xl bg-foreground/[0.01] border border-[var(--pos-stroke)] transition duration-200">
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-2.5 min-w-0">
                                 <div className="w-5 h-5 rounded-full bg-pos-brand text-black flex items-center justify-center text-[10px] font-bold shrink-0">
@@ -410,7 +410,7 @@ export default function DashboardPage() {
                         <Clock className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                         <h2 className="text-lg font-semibold">Recent Transactions</h2>
                       </div>
-                      <Link href="/bill-history" className="text-xs text-[var(--pos-brand)] hover:underline font-semibold cursor-pointer">
+                      <Link href="/bill-history" className="text-xs text-[var(--pos-brand-text)] hover:underline font-semibold cursor-pointer">
                         View All
                       </Link>
                     </div>
@@ -441,7 +441,7 @@ export default function DashboardPage() {
                             <div 
                               key={order.id || order.bill_number} 
                               onClick={() => setViewingBill(order)}
-                              className="flex items-center justify-between p-3 rounded-xl bg-foreground/[0.01] border border-[var(--pos-stroke)] hover:bg-foreground/[0.03] transition duration-150 cursor-pointer"
+                              className="flex items-center justify-between p-3 rounded-xl bg-foreground/[0.01] border border-[var(--pos-stroke)] active:bg-foreground/[0.03] transition duration-150 cursor-pointer"
                             >
                               <div className="min-w-0 flex-1 flex items-center gap-3">
                                 <div className="p-2 bg-foreground/5 rounded-lg text-muted-foreground shrink-0">
@@ -499,7 +499,7 @@ export default function DashboardPage() {
                         return (
                           <div
                             key={product.id}
-                            className="flex flex-col gap-2 p-3 rounded-xl bg-destructive/[0.01] border border-destructive/20 hover:bg-destructive/[0.03] transition duration-200"
+                            className="flex flex-col gap-2 p-3 rounded-xl bg-destructive/[0.01] border border-destructive/20 transition duration-200"
                           >
                             <div className="flex items-center justify-between gap-1">
                               <div className="min-w-0 flex-1">
