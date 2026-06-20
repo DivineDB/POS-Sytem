@@ -1,4 +1,4 @@
-import { supabase, BillHistory, BillItem } from './supabase'
+import { BillHistory, BillItem } from './supabase'
 
 export interface CreateBillData {
   tableNumber: string
@@ -20,7 +20,7 @@ export class BillService {
     try {
       // Generate bill number
       const billNumber = `BILL-${Date.now()}-${Math.random().toString(36).substr(2, 4).toUpperCase()}`
-      
+
       // Transform items to match database structure
       const billItems: BillItem[] = data.items.map(item => ({
         id: item.id,
@@ -41,18 +41,21 @@ export class BillService {
         total: data.total
       }
 
-      const { data: insertedBill, error } = await supabase
-        .from('bill_history')
-        .insert([billData])
-        .select()
-        .single()
+      // Use API route to avoid browser CORS/network issues
+      const res = await fetch('/api/bills', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(billData),
+      })
 
-      if (error) {
-        console.error('Error creating bill:', error)
+      const json = await res.json()
+
+      if (!res.ok || json.error) {
+        console.error('Error creating bill:', json.error)
         return null
       }
 
-      return insertedBill
+      return json.data
     } catch (error) {
       console.error('Error in createBill:', error)
       return null
@@ -66,35 +69,23 @@ export class BillService {
     limit?: number
   }): Promise<BillHistory[]> {
     try {
-      let query = supabase
-        .from('bill_history')
-        .select('*')
-        .order('created_at', { ascending: false })
+      // Build query params
+      const params = new URLSearchParams()
+      if (filters?.type) params.set('type', filters.type)
+      if (filters?.dateFrom) params.set('dateFrom', filters.dateFrom)
+      if (filters?.dateTo) params.set('dateTo', filters.dateTo)
+      if (filters?.limit) params.set('limit', String(filters.limit))
 
-      if (filters?.type) {
-        query = query.eq('type', filters.type)
-      }
+      const url = `/api/bills${params.toString() ? '?' + params.toString() : ''}`
+      const res = await fetch(url)
+      const json = await res.json()
 
-      if (filters?.dateFrom) {
-        query = query.gte('created_at', filters.dateFrom)
-      }
-
-      if (filters?.dateTo) {
-        query = query.lte('created_at', filters.dateTo)
-      }
-
-      if (filters?.limit) {
-        query = query.limit(filters.limit)
-      }
-
-      const { data, error } = await query
-
-      if (error) {
-        console.error('Error fetching bills:', error)
+      if (!res.ok || json.error) {
+        console.error('Error fetching bills:', json.error)
         return []
       }
 
-      return data || []
+      return json.data || []
     } catch (error) {
       console.error('Error in getBills:', error)
       return []
@@ -103,18 +94,15 @@ export class BillService {
 
   static async getBillById(id: string): Promise<BillHistory | null> {
     try {
-      const { data, error } = await supabase
-        .from('bill_history')
-        .select('*')
-        .eq('id', id)
-        .single()
+      const res = await fetch(`/api/bills/${id}`)
+      const json = await res.json()
 
-      if (error) {
-        console.error('Error fetching bill:', error)
+      if (!res.ok || json.error) {
+        console.error('Error fetching bill:', json.error)
         return null
       }
 
-      return data
+      return json.data
     } catch (error) {
       console.error('Error in getBillById:', error)
       return null
@@ -123,13 +111,11 @@ export class BillService {
 
   static async deleteBill(id: string): Promise<boolean> {
     try {
-      const { error } = await supabase
-        .from('bill_history')
-        .delete()
-        .eq('id', id)
+      const res = await fetch(`/api/bills/${id}`, { method: 'DELETE' })
+      const json = await res.json()
 
-      if (error) {
-        console.error('Error deleting bill:', error)
+      if (!res.ok || json.error) {
+        console.error('Error deleting bill:', json.error)
         return false
       }
 

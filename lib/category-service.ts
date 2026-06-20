@@ -1,27 +1,19 @@
-import { supabase } from './supabase'
+import { Category } from './supabase'
 
-export interface Category {
-  id: string
-  name: string
-  color: string
-  created_at?: string
-  updated_at?: string
-}
+export type { Category }
 
 export class CategoryService {
   static async getCategories(): Promise<Category[]> {
     try {
-      const { data, error } = await supabase
-        .from('categories')
-        .select('*')
-        .order('created_at', { ascending: true })
+      const res = await fetch('/api/categories')
+      const json = await res.json()
 
-      if (error) {
-        console.error('Error fetching categories:', error)
+      if (!res.ok || json.error) {
+        console.error('Error fetching categories:', json.error)
         return []
       }
 
-      return data || []
+      return json.data || []
     } catch (error) {
       console.error('Error in getCategories:', error)
       return []
@@ -30,18 +22,19 @@ export class CategoryService {
 
   static async createCategory(category: Omit<Category, 'created_at' | 'updated_at'>): Promise<Category | null> {
     try {
-      const { data, error } = await supabase
-        .from('categories')
-        .insert([category])
-        .select()
-        .single()
+      const res = await fetch('/api/categories', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(category),
+      })
+      const json = await res.json()
 
-      if (error) {
-        console.error('Error creating category:', error)
+      if (!res.ok || json.error) {
+        console.error('Error creating category:', json.error)
         return null
       }
 
-      return data
+      return json.data
     } catch (error) {
       console.error('Error in createCategory:', error)
       return null
@@ -50,19 +43,19 @@ export class CategoryService {
 
   static async updateCategory(id: string, updates: Partial<Omit<Category, 'id' | 'created_at' | 'updated_at'>>): Promise<Category | null> {
     try {
-      const { data, error } = await supabase
-        .from('categories')
-        .update(updates)
-        .eq('id', id)
-        .select()
-        .single()
+      const res = await fetch(`/api/categories/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates),
+      })
+      const json = await res.json()
 
-      if (error) {
-        console.error('Error updating category:', error)
+      if (!res.ok || json.error) {
+        console.error('Error updating category:', json.error)
         return null
       }
 
-      return data
+      return json.data
     } catch (error) {
       console.error('Error in updateCategory:', error)
       return null
@@ -71,13 +64,13 @@ export class CategoryService {
 
   static async deleteCategory(id: string): Promise<boolean> {
     try {
-      const { error } = await supabase
-        .from('categories')
-        .delete()
-        .eq('id', id)
+      const res = await fetch(`/api/categories/${id}`, {
+        method: 'DELETE',
+      })
+      const json = await res.json()
 
-      if (error) {
-        console.error('Error deleting category:', error)
+      if (!res.ok || json.error) {
+        console.error('Error deleting category:', json.error)
         return false
       }
 

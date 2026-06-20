@@ -2,9 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { Sidebar } from '@/components/pos/sidebar'
-import { BillService } from '@/lib/bill-service'
-import { supabase, BillHistory } from '@/lib/supabase'
-import { Receipt, Search, Filter, Calendar, Eye, Download, IndianRupee, QrCode, CreditCard, Share2, Copy, Mail, MessageSquare, ChevronDown, Send, X } from 'lucide-react'
+import { BillHistory } from '@/lib/supabase'
+import { Receipt, Search, Filter, Calendar, Eye, Download, IndianRupee, QrCode, CreditCard, Share2, Copy, MessageSquare, ChevronDown, X } from 'lucide-react'
 import { format } from 'date-fns'
 import { generateBillPDF } from '@/lib/pdf-generator'
 import { useStore } from '@/lib/store'
@@ -83,19 +82,19 @@ export default function BillHistoryPage() {
     try {
       setLoading(true)
       setError(null)
-      const { data, error: fetchError } = await supabase
-        .from('bill_history')
-        .select('*')
-        .order('created_at', { ascending: false })
 
-      if (fetchError) {
-        console.error('Error fetching bills:', fetchError)
-        setError(fetchError.message || 'Failed to fetch bills from the database.')
-        toast.error(`Failed to load bill history: ${fetchError.message}`)
+      const res = await fetch('/api/bills')
+      const json = await res.json()
+
+      if (!res.ok || json.error) {
+        const msg = json.error || 'Failed to fetch bills from the database.'
+        console.error('Error fetching bills:', msg)
+        setError(msg)
+        toast.error(`Failed to load bill history: ${msg}`)
         return
       }
 
-      setBills(data || [])
+      setBills(json.data || [])
     } catch (err: any) {
       console.error('Error:', err)
       setError(err?.message || 'An unexpected error occurred.')

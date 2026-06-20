@@ -1,32 +1,19 @@
-import { supabase } from './supabase'
+import { Product } from './supabase'
 
-export interface Product {
-  id: string
-  name: string
-  retail_price: number
-  wholesale_price: number
-  category_id: string
-  stock: number
-  low_stock_threshold: number
-  order_count: number
-  created_at?: string
-  updated_at?: string
-}
+export type { Product }
 
 export class ProductService {
   static async getProducts(): Promise<Product[]> {
     try {
-      const { data, error } = await supabase
-        .from('products')
-        .select('*')
-        .order('created_at', { ascending: true })
+      const res = await fetch('/api/products')
+      const json = await res.json()
 
-      if (error) {
-        console.error('Error fetching products:', error)
+      if (!res.ok || json.error) {
+        console.error('Error fetching products:', json.error)
         return []
       }
 
-      return data || []
+      return json.data || []
     } catch (error) {
       console.error('Error in getProducts:', error)
       return []
@@ -35,18 +22,15 @@ export class ProductService {
 
   static async getProductsByCategory(categoryId: string): Promise<Product[]> {
     try {
-      const { data, error } = await supabase
-        .from('products')
-        .select('*')
-        .eq('category_id', categoryId)
-        .order('created_at', { ascending: true })
+      const res = await fetch(`/api/products?categoryId=${categoryId}`)
+      const json = await res.json()
 
-      if (error) {
-        console.error('Error fetching products by category:', error)
+      if (!res.ok || json.error) {
+        console.error('Error fetching products by category:', json.error)
         return []
       }
 
-      return data || []
+      return json.data || []
     } catch (error) {
       console.error('Error in getProductsByCategory:', error)
       return []
@@ -55,18 +39,19 @@ export class ProductService {
 
   static async createProduct(product: Omit<Product, 'created_at' | 'updated_at'>): Promise<Product | null> {
     try {
-      const { data, error } = await supabase
-        .from('products')
-        .insert([product])
-        .select()
-        .single()
+      const res = await fetch('/api/products', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(product),
+      })
+      const json = await res.json()
 
-      if (error) {
-        console.error('Error creating product:', error)
+      if (!res.ok || json.error) {
+        console.error('Error creating product:', json.error)
         return null
       }
 
-      return data
+      return json.data
     } catch (error) {
       console.error('Error in createProduct:', error)
       return null
@@ -75,19 +60,19 @@ export class ProductService {
 
   static async updateProduct(id: string, updates: Partial<Omit<Product, 'id' | 'created_at' | 'updated_at'>>): Promise<Product | null> {
     try {
-      const { data, error } = await supabase
-        .from('products')
-        .update(updates)
-        .eq('id', id)
-        .select()
-        .single()
+      const res = await fetch(`/api/products/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates),
+      })
+      const json = await res.json()
 
-      if (error) {
-        console.error('Error updating product:', error)
+      if (!res.ok || json.error) {
+        console.error('Error updating product:', json.error)
         return null
       }
 
-      return data
+      return json.data
     } catch (error) {
       console.error('Error in updateProduct:', error)
       return null
@@ -96,13 +81,13 @@ export class ProductService {
 
   static async deleteProduct(id: string): Promise<boolean> {
     try {
-      const { error } = await supabase
-        .from('products')
-        .delete()
-        .eq('id', id)
+      const res = await fetch(`/api/products/${id}`, {
+        method: 'DELETE',
+      })
+      const json = await res.json()
 
-      if (error) {
-        console.error('Error deleting product:', error)
+      if (!res.ok || json.error) {
+        console.error('Error deleting product:', json.error)
         return false
       }
 
@@ -115,11 +100,15 @@ export class ProductService {
 
   static async incrementOrderCount(id: string): Promise<boolean> {
     try {
-      const { error } = await supabase
-        .rpc('increment_order_count', { product_id: id })
+      const res = await fetch('/api/products/increment-order-count', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productId: id }),
+      })
+      const json = await res.json()
 
-      if (error) {
-        console.error('Error incrementing order count:', error)
+      if (!res.ok || json.error) {
+        console.error('Error incrementing order count:', json.error)
         return false
       }
 
@@ -132,11 +121,15 @@ export class ProductService {
 
   static async decrementStock(id: string, quantity: number): Promise<boolean> {
     try {
-      const { error } = await supabase
-        .rpc('decrement_stock', { product_id: id, quantity_to_subtract: quantity })
+      const res = await fetch('/api/products/decrement-stock', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productId: id, quantity }),
+      })
+      const json = await res.json()
 
-      if (error) {
-        console.error('Error decrementing stock:', error)
+      if (!res.ok || json.error) {
+        console.error('Error decrementing stock:', json.error)
         return false
       }
 
