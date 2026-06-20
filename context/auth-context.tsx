@@ -11,7 +11,7 @@ const mockUser: User = {
   email: "guest@ssgstore.com",
   app_metadata: {},
   user_metadata: {
-    full_name: "Divyansh (Owner)",
+    full_name: "Divyansh",
     role: "owner"
   },
   aud: "authenticated",
@@ -23,11 +23,17 @@ const getPersistedMockUser = (): User => {
   try {
     const savedName = localStorage.getItem('ssg_mock_cashier_name')
     if (savedName) {
+      // Strip legacy bracket role suffix e.g. "Divyansh (Owner)" -> "Divyansh"
+      const cleanName = savedName.replace(/\s*\([^)]+\)\s*$/, '').trim()
+      // Persist the cleaned name back to remove old format
+      if (cleanName !== savedName) {
+        localStorage.setItem('ssg_mock_cashier_name', cleanName)
+      }
       return {
         ...mockUser,
         user_metadata: {
           ...mockUser.user_metadata,
-          full_name: savedName
+          full_name: cleanName
         }
       }
     }
@@ -168,9 +174,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const switchRole = async (role: 'worker' | 'cashier' | 'owner') => {
     const names = {
-      worker: "Rakesh (Worker)",
-      cashier: "Sumit (Cashier)",
-      owner: "Divyansh (Owner)"
+      worker: "Rakesh",
+      cashier: "Sumit",
+      owner: "Divyansh"
     }
     const name = names[role]
 

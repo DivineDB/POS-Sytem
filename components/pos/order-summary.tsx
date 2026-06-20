@@ -22,8 +22,7 @@ export function OrderSummary({ priceMode, refetchData }: { priceMode: "retail" |
 
   const activeProfile = (() => {
     const name = user?.user_metadata?.full_name || user?.email?.split('@')[0] || "Guest"
-    const role = user?.user_metadata?.role || "owner"
-    return `${name} (${role.charAt(0).toUpperCase() + role.slice(1)})`
+    return name
   })()
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("cash")
 
